@@ -5,23 +5,17 @@
  * @format
  */
 
-
-import { StatusBar, Text, useColorScheme } from 'react-native';
-import {
-  SafeAreaProvider,
-} from 'react-native-safe-area-context';
-import './global.css'
+import { Text, useColorScheme, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import './global.css';
+import RootNavigator from './src/navigation/RootNavigator';
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text className="text-blue-500">hello world</Text>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <RootNavigator />
+    </NavigationContainer>
   );
 }
-
-
 
 export default App;

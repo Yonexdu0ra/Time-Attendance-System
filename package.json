@@ -10,13 +10,23 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native/new-app-screen": "0.83.0",
+    "@react-navigation/bottom-tabs": "^7.8.12",
+    "@react-navigation/elements": "^2.9.2",
+    "@react-navigation/native": "^7.1.25",
+    "@react-navigation/stack": "^7.6.12",
     "nativewind": "^4.2.1",
     "react": "19.2.0",
     "react-native": "0.83.0",
+    "react-native-calendars": "^1.1313.0",
+    "react-native-gesture-handler": "^2.29.1",
     "react-native-reanimated": "^4.2.0",
     "react-native-safe-area-context": "^5.5.2",
-    "react-native-worklets": "^0.7.1"
+    "react-native-screens": "^4.19.0",
+    "react-native-vision-camera": "^4.7.3",
+    "react-native-worklets": "^0.7.1",
+    "vision-camera-code-scanner": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
