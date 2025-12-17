@@ -10,7 +10,7 @@ const Tab = createBottomTabNavigator();
 
 export default function RootTab() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false, animation: 'shift' }} initialRouteName='Home'>
+    <Tab.Navigator screenOptions={{ headerShown: false, animation: 'shift' }} backBehavior="none" initialRouteName='Home'>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Shift" component={ShiftScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
