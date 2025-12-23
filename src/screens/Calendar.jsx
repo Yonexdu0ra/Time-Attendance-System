@@ -54,7 +54,9 @@ function CalendarScreen({ navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      
+      title: "Lịch sử chấm công",
+      headerTitleAlign: 'center',
+      tabBarLabel: 'Lịch sử',
     });
   }, [navigation]);
   return (

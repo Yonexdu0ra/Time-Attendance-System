@@ -6,16 +6,19 @@ import LoginScreen from '../screens/Login';
 // import ProfileScreen from '../screens/Profile';
 import RootTab from './RootTab';
 import NotificationScreen from '../screens/Notification';
-import { useAuth } from '../context/AuthContext';
-import SplashScreen from '../screens/Splash'
+// import { useAuth } from '../context/AuthContext';
+import SplashScreen from '../screens/Splash';
+import useAuthStore from '../store/authStore';
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
-  const { isLoading, user } = useAuth();
-  if (isLoading) return <SplashScreen/>
-  if(!user || !user?.id) return <AuthStack/>
+  const loading = useAuthStore(state => state.loading);
+  const user = useAuthStore(state => state.user);
 
-  return <AppStack />;
+  // const { isLoading, user } = useAuth();
+  if (loading) return <SplashScreen />;
+  if (!user || !user?.id) return <AuthStack />;
+  return user.role < 1 ? <ManagerStack /> : <UserStack />;
 }
 
 function AuthStack() {
@@ -29,13 +32,25 @@ function AuthStack() {
   );
 }
 
-function AppStack() {
+function UserStack() {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
       initialRouteName="RootTab"
     >
       <Stack.Screen name="RootTab" component={RootTab} />
+      <Stack.Screen name="Notification" component={NotificationScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function ManagerStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+      initialRouteName="Notification"
+    >
+      {/* <Stack.Screen name="RootTab" component={RootTab} /> */}
       <Stack.Screen name="Notification" component={NotificationScreen} />
     </Stack.Navigator>
   );

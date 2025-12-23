@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 function AuthProvider({ children }) {
     const [isLoading, setIsLoading] = useState(true);
+    const [accessToken, setAccessToken] = useState(null);
     const [user, setUser] = useState();
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -18,7 +19,9 @@ function AuthProvider({ children }) {
     }, []);
     return <AuthContext.Provider value={{
         isLoading,
-        user
+        user,
+        accessToken,
+        setAccessToken
     }}>{children}</AuthContext.Provider>
 }
 

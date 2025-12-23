@@ -1,67 +1,31 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
-const Item = ({ title }) => (
-  <View>
-    <Text className="text-red-500 p-4">{title}</Text>
-  </View>
-);
-function HomeScreen({ navigation }) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+import { Bell } from 'lucide-react-native';
+import {  useLayoutEffect } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import Button from '../components/Button';
 
-  const fetchData = async () => {
-    // setLoading(true);
-    // setRefreshing(true);
-    fetch('https://jsonplaceholder.typicode.com/todos/')
-      .then(response => response.json())
-      .then(json => setData(json))
-      .catch(error => console.error(error))
-      .finally(() => {
-        setLoading(false);
-      })
-      .then(() => setRefreshing(false));
+function HomeScreen({ navigation }) {
+  const handleNotificationPress = () => {
+    navigation.push('Notification');
   };
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData();
-  }, []);
-  useEffect(() => {
-    fetchData();
-  }, []);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: 'Tuyến Công CB',
+      title: 'Trang chủ',
       headerRight: () => (
-        <Text
-          className="text-lg font-bold ml-4"
-          onPress={() => navigation.navigate('Notification')}
+        <Button
+          variant="secondary"
+          className="mr-4"
+          onPress={handleNotificationPress}
         >
-          Noti
-        </Text>
+          <Bell />
+        </Button>
       ),
     });
   }, [navigation]);
   return (
     <View>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {loading ? (
-          <ActivityIndicator />
-        ) : (
-          data.map(item => <Item key={item.id} title={item.title} />)
-        )}
+      <ScrollView>
+        <Text>Home screen</Text>
       </ScrollView>
     </View>
   );

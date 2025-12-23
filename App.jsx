@@ -13,16 +13,22 @@ import RootNavigator from './src/navigation/RootNavigator';
 import ThemeProvider from './src/context/ThemeContext';
 import Toast from 'react-native-toast-message';
 import AuthProvider from './src/context/AuthContext';
+import useAuthStore from './src/store/authStore';
+import { useEffect } from 'react';
 function App() {
+  const init = useAuthStore(state => state.init);
+  useEffect(() => {
+    init();
+  }, []);
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <NavigationContainer>
-          <RootNavigator />
-          <Toast />
-        </NavigationContainer>
-      </ThemeProvider>
-    </AuthProvider>
+    // <AuthProvider>
+    <ThemeProvider>
+      <NavigationContainer>
+        <RootNavigator />
+        <Toast />
+      </NavigationContainer>
+    </ThemeProvider>
+    // </AuthProvider>
   );
 }
 
