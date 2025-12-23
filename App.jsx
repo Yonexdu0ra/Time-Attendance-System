@@ -25,7 +25,7 @@ function App() {
     <ThemeProvider>
       <NavigationContainer>
         <RootNavigator />
-        <Toast />
+        <Toast position='bottom' />
       </NavigationContainer>
     </ThemeProvider>
     // </AuthProvider>

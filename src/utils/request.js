@@ -39,7 +39,6 @@ async function refreshAccessToken() {
   if (!res.ok) throw new Error('REFRESH_FAILED');
 
   const data = await res.json();
-  console.log(data);
   
   if (data.data?.refreshToken) {
     await saveRefreshToken(data.data.refreshToken);

@@ -7,21 +7,21 @@ function HomeScreen({ navigation }) {
   const handleNotificationPress = () => {
     navigation.push('Notification');
   };
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      title: 'Trang chủ',
-      headerRight: () => (
-        <Button
-          variant="secondary"
-          className="mr-4"
-          onPress={handleNotificationPress}
-        >
-          <Bell />
-        </Button>
-      ),
-    });
-  }, [navigation]);
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerShown: true,
+  //     title: 'Trang chủ',
+  //     headerRight: () => (
+  //       <Button
+  //         variant="secondary"
+  //         className="mr-4"
+  //         onPress={handleNotificationPress}
+  //       >
+  //         <Bell />
+  //       </Button>
+  //     ),
+  //   });
+  // }, [navigation]);
   return (
     <View>
       <ScrollView>

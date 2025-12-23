@@ -9,14 +9,7 @@ function ProfileScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const { themeColor } = useTheme();
   
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'Thông tin cá nhân',
-      headerShown: true,
-      tabBarLabel: 'Profile',
-      headerTitleAlign: 'center',
-    });
-  }, [navigation]);
+  
   return (
     <View
       className="flex-1 justify-center items-center"

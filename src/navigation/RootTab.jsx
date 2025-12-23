@@ -15,39 +15,67 @@ export default function RootTab() {
     <Tab.Navigator
       initialRouteName="Home"
       backBehavior="none"
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: '#7c3aed', // màu icon active
-        tabBarInactiveTintColor: '#6b7280', // màu icon inactive
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 0,
-          elevation: 2,
-        },
-        tabBarIcon: ({ color, size }) => {
-          // Chọn icon dựa theo route
-          switch (route.name) {
-            case 'Home':
-              return <House color={color} size={size} />;
-            case 'Shift':
-              return <Clock color={color} size={size} />;
-            case 'Calendar':
-              return <Calendar color={color} size={size} />;
-            case 'Request':
-              return <ListOrdered color={color} size={size} />;
-            case 'Profile':
-              return <User color={color} size={size} />;
-            default:
-              return null;
-          }
-        },
-      })}
+      
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Shift" component={ShiftScreen} />
-      <Tab.Screen name="Calendar" component={CalendarScreen} />
-      <Tab.Screen name="Request" component={RequestTopTab} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: 'Trang chủ',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <House color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Shift"
+        component={ShiftScreen}
+        options={{
+          title: 'Ca làm việc',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => (
+            <Clock color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          title: 'Công',
+          headerTitleAlign: 'center',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Calendar color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Request"
+        component={RequestTopTab}
+        options={{
+          title: 'Yêu cầu',
+          headerTitleAlign: 'center',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <ListOrdered color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Hồ sơ',
+          headerTitleAlign: 'center',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <User color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }

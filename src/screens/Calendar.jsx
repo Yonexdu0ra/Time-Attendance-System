@@ -51,14 +51,7 @@ LocaleConfig.locales['vi'] = {
 LocaleConfig.defaultLocale = 'vi';
 function CalendarScreen({ navigation }) {
   const [selected, setSelected] = useState('');
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      title: "Lịch sử chấm công",
-      headerTitleAlign: 'center',
-      tabBarLabel: 'Lịch sử',
-    });
-  }, [navigation]);
+ 
   return (
     <View>
       <Text>Calendar Screen</Text>
