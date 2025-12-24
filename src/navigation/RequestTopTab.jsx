@@ -12,6 +12,7 @@ function RequestTopTab({ navigation }) {
         component={LeaveRequestScreen}
         options={{
           title: 'Nghỉ phép',
+          swipeEnabled: false
         }}
       />
       <Tab.Screen
@@ -19,6 +20,7 @@ function RequestTopTab({ navigation }) {
         component={OvertimeRequestScreen}
         options={{
           title: 'Tăng ca',
+          swipeEnabled: false
         }}
       />
     </Tab.Navigator>
