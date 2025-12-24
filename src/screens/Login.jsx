@@ -1,22 +1,16 @@
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { View, Pressable, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { use, useEffect, useLayoutEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
-import Input from '../components/Input';
-import Button from '../components/Button';
 import { request } from '../utils/request';
 import useAuthStore from '../store/authStore';
 import accessTokenStore from '../store/accessTokenStore';
 import { saveRefreshToken } from '../utils/token';
 import DeviceInfo from 'react-native-device-info';
+import { Text } from '@/components/ui/text';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState({
     identifier: '',
@@ -27,7 +21,6 @@ export default function LoginScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const { themeColor } = useTheme();
   const handlePressLogin = async () => {
-   
     try {
       const device = {
         deviceId: DeviceInfo.getUniqueId(),
@@ -45,7 +38,7 @@ export default function LoginScreen({ navigation }) {
         body: JSON.stringify({
           identifier: formData.identifier,
           password: formData.password,
-          device
+          device,
         }),
       });
       accessTokenStore.getState().setAccessToken(data.data.accessToken);
@@ -80,27 +73,25 @@ export default function LoginScreen({ navigation }) {
     }
   }, [navigation]);
   return (
-    <SafeAreaView
-      className="flex-1"
-      style={{ backgroundColor: themeColor.background }}
+    <View
+      className="flex-1 bg-background"
+      
     >
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',
+          gap: 4
         }}
-        className="px-6"
+        className="px-4"
         keyboardShouldPersistTaps="always"
       >
         <View>
-          <Text
-            style={{ color: themeColor.text }}
-            className="text-2xl font-bold my-4"
-          >
+          <Text className="text-2xl font-bold my-4">
             Đăng nhập để tiếp tục sử dụng ứng dụng.
           </Text>
         </View>
-        <View className="flex flex-col ">
+        <View className="flex flex-col gap-4">
           <View>
             <Input
               value={formData.identifier}
@@ -117,32 +108,13 @@ export default function LoginScreen({ navigation }) {
             />
           </View>
         </View>
-        <View className="gap-2">
-          <Pressable
-            disabled={isDisabled}
-            className="h-[48] rounded-[12px] flex items-center justify-center "
-            style={{
-              backgroundColor: themeColor.primary,
-              opacity: isDisabled ? 0.5 : 1,
-            }}
-            onPress={handlePressLogin}
-          >
-            {({ pressed }) => (
-              <Text
-                className="text-base font-medium"
-                style={{
-                  color: themeColor.primaryForeground,
-                  opacity: pressed ? 0.8 : 1,
-                  transform: [{ scale: pressed ? 0.98 : 1 }],
-                }}
-              >
-                Đăng nhập
-              </Text>
-            )}
-          </Pressable>
-          <Button title="Quên mật khẩu?" variant="link" />
+        <View className="flex gap-2 mt-4">
+          <Button onPress={handlePressLogin} disabled={isDisabled}><Text>Đăng nhập</Text></Button>
+          <Button variant="link">
+            <Text>Quên mật khẩu?</Text>
+          </Button>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
