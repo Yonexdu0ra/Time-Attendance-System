@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "606026113506",
-    "project_id": "quanlychamcong-24228",
-    "storage_bucket": "quanlychamcong-24228.firebasestorage.app"
+    "project_number": "403586660120",
+    "project_id": "fir-595d1",
+    "storage_bucket": "fir-595d1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:606026113506:android:c7fb48f1777990cf2ed9bb",
+        "mobilesdk_app_id": "1:403586660120:android:6028309e375e97f478506d",
         "android_client_info": {
-          "package_name": "com.qujs.qujs"
+          "package_name": "com.quanlychamcong.qujs"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBWql3J3K7RPA06qFSSVf8-Zvhbb8SvCp8"
+          "current_key": "AIzaSyC_N8Wo74of07A-k4ATSMdh6NmIptgB608"
         }
       ],
       "services": {

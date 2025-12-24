@@ -11,7 +11,7 @@ function RequestTopTab({ navigation }) {
         name="LeaveRequest"
         component={LeaveRequestScreen}
         options={{
-          title: 'Xin nghỉ',
+          title: 'Nghỉ phép',
         }}
       />
       <Tab.Screen

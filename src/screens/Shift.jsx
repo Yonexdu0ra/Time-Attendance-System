@@ -1,75 +1,71 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   RefreshControl,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import Button from '../components/Button';
-import Input from '../components/Input';
-import { Ellipsis } from 'lucide-react-native';
-import { request } from '../utils/request';
-import Toast from 'react-native-toast-message';
+import { Button } from '../components/ui/button';
+import { Text } from '../components/ui/text';
 import useShiftStore from '../store/shiftStore';
-// const filterOptions = [
-//   { label: 'Tất cả', value: 'all', isActive: true },
-//   { label: 'Sắp tới', value: 'upcoming', isActive: false },
-//   { label: 'Đã hoàn thành', value: 'completed', isActive: false },
-//   { label: 'Chờ duyệt', value: 'pending', isActive: false },
-//   { label: 'Đã từ chối', value: 'rejected', isActive: false },
-// ];
+import { Input } from '../components/ui/input';
+
 function ShiftScreen({ navigation }) {
   const { themeColor } = useTheme();
   const isLoading = useShiftStore(state => state.isLoading);
   const shifts = useShiftStore(state => state.shifts);
   const handleJoinShift = useShiftStore(state => state.handleJoinShift);
-  const handleCancelJoinShift = useShiftStore(state => state.handleCancelJoinShift);
+  const handleCancelJoinShift = useShiftStore(
+    state => state.handleCancelJoinShift,
+  );
   const isRefreshing = useShiftStore(state => state.isRefreshing);
   const handleRefresh = useShiftStore(state => state.handleRefreshShifts);
   const init = useShiftStore(state => state.init);
   const filterOptions = useShiftStore(state => state.filterOptions);
-  const handleChoiceFilterOption = useShiftStore(state => state.handleChoiceFilterOption);
+  const handleChoiceFilterOption = useShiftStore(
+    state => state.handleChoiceFilterOption,
+  );
   useEffect(() => {
-    init()
+    init();
   }, []);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerSearchBarOptions: {
+        placeholder: 'Tìm kiếm ca làm việc',
+        onChangeText: event => {
+          const text = event.nativeEvent.text;
+          console.log(text);
+        },
+      },
+    });
+  }, [navigation]);
   return (
     <View className="flex-1" style={{ backgroundColor: themeColor.background }}>
-      {/* <StatusBar
-        barStyle="dark-content" // hoặc 'light-content' tùy màu chữ
-        backgroundColor={themeColor.background} // Android
-      /> */}
       <View className="p-4 gap-2">
-        <Input placeholder="Tìm kiếm ca làm việc" />
-        <ScrollView horizontal>
+        {/* <Input placeholder="Tìm kiếm ca làm việc" /> */}
+        <Text>Sắp xếp theo</Text>
+        <ScrollView
+          horizontal
+          className="bg-background rounded-lg"
+          contentContainerClassName="flex-row gap-4"
+        >
           {filterOptions.map((option, index) => (
-            <Pressable
+            <Button
               key={index}
-              className="px-[12px] py-[6px] mr-[8px] rounded-[20px] border"
-              style={{
-                borderColor: themeColor.border,
-                backgroundColor: option.isActive
-                  ? themeColor.primary
-                  : themeColor.secondary,
-              }}
               onPress={() => handleChoiceFilterOption(option.value)}
+              variant={option.isActive ? 'default' : 'outline'}
             >
-              <Text
-                style={{
-                  color: option.isActive
-                    ? themeColor.background
-                    : themeColor.text,
-                }}
-              >
-                {option.label}
-              </Text>
-            </Pressable>
+              <Text>{option.label}</Text>
+            </Button>
           ))}
         </ScrollView>
       </View>
-      <ScrollView  refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+      >
         <View
           className="p-4 gap-4"
           style={{ backgroundColor: themeColor.secondary }}
@@ -99,18 +95,11 @@ function ShiftScreen({ navigation }) {
                     className="p-4 mb-4  flex flex-row justify-between items-center"
                     style={{ borderColor: themeColor.border }}
                   >
-                    <Text
-                      className="text-lg font-bold"
-                      style={{ color: themeColor.text }}
-                    >
-                      {shift.name}
-                    </Text>
-                    <Text style={{ color: themeColor.mutedForeground }}>
-                      {shift.type}
-                    </Text>
+                    <Text className="text-lg font-bold">{shift.name}</Text>
+                    <Text variant="muted">{shift.type}</Text>
                   </View>
                   <View>
-                    <Text style={{ color: themeColor.mutedForeground }}>
+                    <Text variant="muted">
                       {new Date(shift.workStart).toLocaleTimeString('vi-VN', {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -130,27 +119,27 @@ function ShiftScreen({ navigation }) {
                   <View className="flex flex-row justify-between  gap-2">
                     {isNoHasRequest && (
                       <Button
-                        title={'Tham gia'}
                         className="flex-1"
                         onPress={() => {
                           handleJoinShift(shift.id);
                         }}
-                      />
+                      >
+                        <Text>Tham gia</Text>
+                      </Button>
                     )}
                     {isPending && (
                       <Button
-                        title={'Hủy yêu cầu'}
                         className="flex-1"
                         variant="destructive"
                         onPress={() => handleCancelJoinShift(isPending.id)}
-                      />
+                      >
+                        <Text>Hủy yêu cầu</Text>
+                      </Button>
                     )}
                     {isRejected && (
-                      <Button
-                        title={'Đã từ chối'}
-                        className="flex-1"
-                        disabled
-                      />
+                      <Button variant="destructive" className="flex-1" disabled>
+                        <Text>Yêu cầu bị từ chối</Text>
+                      </Button>
                     )}
                     {isJoin && <Text>Bạn đã tham gia</Text>}
                     {/* <Button variant="secondary">

@@ -1,4 +1,11 @@
-import { View, Text, TextInput, Pressable, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { use, useEffect, useLayoutEffect, useState } from 'react';
@@ -9,6 +16,7 @@ import { request } from '../utils/request';
 import useAuthStore from '../store/authStore';
 import accessTokenStore from '../store/accessTokenStore';
 import { saveRefreshToken } from '../utils/token';
+import DeviceInfo from 'react-native-device-info';
 export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState({
     identifier: '',
@@ -19,8 +27,16 @@ export default function LoginScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const { themeColor } = useTheme();
   const handlePressLogin = async () => {
-    // setFormData({ identifier: '', password: '' });
+   
     try {
+      const device = {
+        deviceId: DeviceInfo.getUniqueId(),
+        deviceName: await DeviceInfo.getDeviceName(),
+        platform: Platform.OS,
+        osVersion: DeviceInfo.getSystemVersion(),
+        appVersion: DeviceInfo.getVersion(),
+        isEmulator: await DeviceInfo.isEmulator(),
+      };
       const data = await request('/auth/login', {
         method: 'POST',
         headers: {
@@ -29,6 +45,7 @@ export default function LoginScreen({ navigation }) {
         body: JSON.stringify({
           identifier: formData.identifier,
           password: formData.password,
+          device
         }),
       });
       accessTokenStore.getState().setAccessToken(data.data.accessToken);
@@ -39,10 +56,9 @@ export default function LoginScreen({ navigation }) {
         text1: 'Đăng nhập thành công',
         text2: JSON.stringify(data.message),
       });
-      
     } catch (error) {
       console.log(error);
-      
+
       Toast.show({
         type: 'error',
         text1: 'Đăng nhập thất bại',
@@ -59,7 +75,7 @@ export default function LoginScreen({ navigation }) {
     setFormData(prev => ({ ...prev, identifier: text }));
   };
   useLayoutEffect(() => {
-    if(user) {
+    if (user) {
       navigation.replace('Home');
     }
   }, [navigation]);
