@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 function ProfileScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const { themeColor, toggleColorScheme, theme } = useTheme();
-
+  const logout = useAuthStore(state => state.logout);
   return (
     <View
       className="flex-1 justify-center items-center"
@@ -30,7 +30,10 @@ function ProfileScreen({ navigation }) {
           <Text variant="muted" className={'font-bold'}>
             Giao diện
           </Text>
-          <Switch checked={theme === 'dark'} onCheckedChange={toggleColorScheme} />
+          <Switch
+            checked={theme === 'dark'}
+            onCheckedChange={toggleColorScheme}
+          />
         </View>
         <View className="flex flex-col gap-2">
           <Text variant="muted" className={'font-bold'}>
@@ -70,6 +73,9 @@ function ProfileScreen({ navigation }) {
         </View>
         <Button className="mt-4">
           <Text>Cập nhật</Text>
+        </Button>
+        <Button className={'mt-4'} onPress={() => logout()} variant="destructive">
+          <Text>Đăng xuất</Text>
         </Button>
       </ScrollView>
     </View>

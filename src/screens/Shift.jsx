@@ -94,7 +94,7 @@ function ShiftScreen({ navigation }) {
                   key={shift.id}
                   className="rounded-[12px] border px-4 py-2"
                 >
-                  <View className="p-4 mb-4  flex flex-row justify-between items-center border">
+                  <View className="p-4 mb-4  flex flex-row justify-between items-center">
                     <Text className="text-lg font-bold">{shift.name}</Text>
                     <Text variant="muted">{shift.type}</Text>
                   </View>
@@ -150,6 +150,7 @@ function ShiftScreen({ navigation }) {
                             onPress={() => {
                               navigation.navigate('StreamQR', {
                                 shiftId: shift.id,
+                                shiftName: shift.name,
                               });
                             }}
                           >

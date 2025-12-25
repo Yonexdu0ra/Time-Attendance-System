@@ -19,7 +19,6 @@ export default function LoginScreen({ navigation }) {
   const isDisabled = !formData.identifier || !formData.password;
 
   const user = useAuthStore.getState().user;
-  const { themeColor } = useTheme();
   const handlePressLogin = async () => {
     try {
       const device = {

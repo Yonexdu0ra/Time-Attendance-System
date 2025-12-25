@@ -26,8 +26,9 @@ const useStreamQRStore = create((set, get) => ({
                 Authorization: `Bearer ${accessToken}`,
                 'content-type': 'application/json',
             },
-            timeout: 30000,
-            debug: true
+            timeout: 300000,
+            debug: true,
+            pollingInterval: 100
         });
 
         es.addEventListener('open', () => {
@@ -35,14 +36,14 @@ const useStreamQRStore = create((set, get) => ({
         });
 
         es.addEventListener('message', (event) => {
+            // console.log(event);
             try {
-                const data = JSON.parse(event.data); // ✅ parse JSON
-                set({ streamQR: data });
-            } catch(error) {
-                console.log(error);
-                
-                set({ streamQR: event.data }); // fallback
+                const data = JSON.parse(event.data);
+                set({ streamQR: data, isLoading: false });
+            } catch (error) {
+                return
             }
+
         });
 
         es.addEventListener('error', (err) => {

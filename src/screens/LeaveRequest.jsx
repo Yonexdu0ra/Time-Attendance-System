@@ -129,6 +129,7 @@ function LeaveRequestScreen({ navigation }) {
         <Button
           variant={'outline'}
           className={'absolute bottom-5 right-5 z-50'}
+          onPress={() => navigation.navigate('RequestLeaveCreate')}
         >
           <Plus />
         </Button>

@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { getRefreshToken, saveRefreshToken} from '../utils/token'
+import { clearRefreshToken } from '../utils/token'
+import Toast from "react-native-toast-message";
 const { request } = require("../utils/request");
 const useAuthStore = create((set, get) => ({
   /* ===== STATE ===== */
@@ -7,7 +8,7 @@ const useAuthStore = create((set, get) => ({
   user: null,
 
   /* ===== ACTIONS ===== */
-  
+
 
   setUser: (user) =>
     set({ user }),
@@ -19,8 +20,8 @@ const useAuthStore = create((set, get) => ({
   init: async () => {
     try {
       const user = await request('/auth/me')
-      
-      if(user?.data) {
+
+      if (user?.data) {
         set({
           user: user.data,
           loading: false,
@@ -28,7 +29,7 @@ const useAuthStore = create((set, get) => ({
       }
     } catch (e) {
       console.log(e);
-      
+
       set({
         user: null,
         loading: false,
@@ -37,11 +38,29 @@ const useAuthStore = create((set, get) => ({
   },
 
   /* ===== LOGOUT ===== */
-  logout: () =>
-    set({
-      user: null,
-      loading: false,
-    }),
+  logout: async () => {
+    try {
+      const logoutData = await request('/auth/logout', { method: 'POST', });
+      Toast.show({
+        type: 'success',
+        text1: 'Thành công',
+        text2: logoutData.message,
+      });
+      await clearRefreshToken();
+      set({
+        user: null,
+        loading: false,
+      })
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Thất bại',
+        text2: error.message || 'Vui lòng thử lại sau',
+      });
+      return;
+    }
+  }
+
 }));
 
 export default useAuthStore;

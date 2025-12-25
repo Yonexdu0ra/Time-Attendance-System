@@ -15,7 +15,6 @@ export default function RootTab() {
     <Tab.Navigator
       initialRouteName="Home"
       backBehavior="none"
-      
     >
       <Tab.Screen
         name="Home"
