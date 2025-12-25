@@ -5,7 +5,7 @@ import {
   clearRefreshToken,
 } from '../utils/token';
 
-const API_URL = process.env.API_URL || 'http://192.168.1.73:3000/api/v1';
+export const API_URL = process.env.API_URL || 'http://192.168.1.73:3000/api/v1';
 
 let isRefreshing = false;
 let refreshSubscribers = [];

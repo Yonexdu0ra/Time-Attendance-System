@@ -18,7 +18,7 @@ import {
   useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
-import Button from '../components/Button'
+import Button from '../components/Button';
 import openAppSetting from '../utils/openAppSetting';
 import { Text } from '@/components/ui/text';
 function HomeScreen({ navigation }) {
@@ -28,35 +28,14 @@ function HomeScreen({ navigation }) {
   const isLoading = useHomeStore(state => state.isLoading);
   const init = useHomeStore(state => state.init);
   const shifts = useHomeStore(state => state.shifts);
-  const [showCamera, setShowCamera] = useState(false);
   const { hasPermission, requestPermission } = useCameraPermission();
-  const [scanned, setScanned] = useState(false);
-  const [qrValue, setQrValue] = useState('');
-  const codeScanner = useCodeScanner({
-    codeTypes: ["qr"], // chỉ quét QR
-    onCodeScanned: (codes) => {
-      if (!scanned && codes.length > 0) {
-        setQrValue(codes[0].value)
-        setScanned(true); // tránh lặp quét
-        // Alert.alert("Đã quét QR", qrValue);
-        // TODO: xử lý qrValue ở đây (mở link, gọi API …)
-      }
-    },
-  });
   
   const handleOpenAppSettings = async () => {
     openAppSetting();
   };
-  const device = useCameraDevice('back', {
-    physicalDevices: [
-      'ultra-wide-angle-camera',
-      'wide-angle-camera',
-      'telephoto-camera',
-    ],
-  });
+  
   const handleOpenCamera = async () => {
-    console.log(hasPermission);
-    setShowCamera(true);
+    navigation.navigate('ScanQR');
   };
   useEffect(() => {
     init();
@@ -79,23 +58,9 @@ function HomeScreen({ navigation }) {
       </View>
     );
   }
-  if (showCamera && device) {
-    return (
-     <>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        photo={true}
-        codeScanner ={codeScanner}
-      />
-      <Text style={{ color: themeColor.background }}>{qrValue}</Text>
-      <Button className='absolute bottom-10 left-1/2 transform -translate-x-1/2' title='Tắt camera' onPress={() => setShowCamera(false)} />
-     </>
-    );
-  }
+  
   return (
-    <View >
+    <View>
       <ScrollView
         horizontal
         pagingEnabled
@@ -122,9 +87,7 @@ function HomeScreen({ navigation }) {
                 <Text className="text-lg font-bold text-center">
                   {shift.address}
                 </Text>
-                <Text
-                  className="font-bold text-4xl text-center w-full"
-                >
+                <Text className="font-bold text-4xl text-center w-full">
                   {currentTime}
                 </Text>
                 {hasPermission ? (

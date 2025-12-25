@@ -9,6 +9,8 @@ import NotificationScreen from '../screens/Notification';
 // import { useAuth } from '../context/AuthContext';
 import SplashScreen from '../screens/Splash';
 import useAuthStore from '../store/authStore';
+import ScanQRScreen from '@/screens/ScanQRS';
+import StreamQRScreen from '@/screens/StreamQR';
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
@@ -40,6 +42,9 @@ function UserStack() {
     >
       <Stack.Screen name="RootTab" component={RootTab} />
       <Stack.Screen name="Notification" component={NotificationScreen} />
+      <Stack.Screen name="ScanQR" component={ScanQRScreen} />
+      <Stack.Screen name="StreamQR" component={StreamQRScreen} />
+
     </Stack.Navigator>
   );
 }

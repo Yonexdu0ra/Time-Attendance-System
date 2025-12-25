@@ -10,9 +10,12 @@ import { Button } from '../components/ui/button';
 import { Text } from '../components/ui/text';
 import useShiftStore from '../store/shiftStore';
 import { Input } from '../components/ui/input';
+import { Ellipsis, QrCode } from 'lucide-react-native';
+import useAuthStore from '@/store/authStore';
 
 function ShiftScreen({ navigation }) {
   const { themeColor } = useTheme();
+  const user = useAuthStore(state => state.user);
   const isLoading = useShiftStore(state => state.isLoading);
   const shifts = useShiftStore(state => state.shifts);
   const handleJoinShift = useShiftStore(state => state.handleJoinShift);
@@ -91,10 +94,7 @@ function ShiftScreen({ navigation }) {
                   key={shift.id}
                   className="rounded-[12px] border px-4 py-2"
                 >
-                  <View
-                    className="p-4 mb-4  flex flex-row justify-between items-center"
-                    style={{ borderColor: themeColor.border }}
-                  >
+                  <View className="p-4 mb-4  flex flex-row justify-between items-center border">
                     <Text className="text-lg font-bold">{shift.name}</Text>
                     <Text variant="muted">{shift.type}</Text>
                   </View>
@@ -141,10 +141,23 @@ function ShiftScreen({ navigation }) {
                         <Text>Yêu cầu bị từ chối</Text>
                       </Button>
                     )}
-                    {isJoin && <Text>Bạn đã tham gia</Text>}
-                    {/* <Button variant="secondary">
-                      <Ellipsis />
-                    </Button> */}
+                    {isJoin && (
+                      <View className="flex-1 flex flex-row justify-between items-center">
+                        <Text>Bạn đã tham gia</Text>
+                        {user.role >= 1 && (
+                          <Button
+                            variant="outline"
+                            onPress={() => {
+                              navigation.navigate('StreamQR', {
+                                shiftId: shift.id,
+                              });
+                            }}
+                          >
+                            <QrCode color={themeColor.foreground} />
+                          </Button>
+                        )}
+                      </View>
+                    )}
                   </View>
                 </View>
               );
