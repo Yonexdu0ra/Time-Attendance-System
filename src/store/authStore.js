@@ -6,7 +6,7 @@ const useAuthStore = create((set, get) => ({
   /* ===== STATE ===== */
   loading: true,
   user: null,
-
+  config: null,
   /* ===== ACTIONS ===== */
 
 
@@ -15,15 +15,18 @@ const useAuthStore = create((set, get) => ({
 
   setLoading: (loading) =>
     set({ loading: loading }),
+  setConfig: (config) => set({ config }),
 
   /* ===== INIT (restore session giả lập) ===== */
   init: async () => {
     try {
       const user = await request('/auth/me')
-
+      const config = await request('/config')
+      
       if (user?.data) {
         set({
           user: user.data,
+          config: config.data,
           loading: false,
         });
       }

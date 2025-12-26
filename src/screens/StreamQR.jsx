@@ -5,9 +5,10 @@ import useTimeCountDown from '@/hooks/useTimeCountDown';
 import accessTokenStore from '@/store/accessTokenStore';
 import useStreamQRStore from '@/store/streamQRStore';
 import formatTime from '@/utils/formatTime';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 function StreamQRScreen({ navigation, route }) {
   const { shiftId, shiftName } = route.params;
   const accessToken = accessTokenStore(state => state.accessToken);
@@ -29,14 +30,20 @@ function StreamQRScreen({ navigation, route }) {
       stopStream();
     };
   }, [shiftId]);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      title: '',
+    });
+  }, [navigation]);
 
   return (
-    <View className="flex-1 items-center justify-center gap-4">
+    <View className="flex-1 items-center justify-center gap-4 bg-background">
       {isLoading ? (
         <Text>Đang tải mã QR...</Text>
       ) : (
-        <View className="items-center justify-center gap-2">
-          <View className="border p-2 rounded-lg gap-2">
+        <Animated.View entering={FadeInDown.delay(100)} className="items-center justify-center gap-2">
+          <View className="border p-2 rounded-lg gap-2 bg-secondary">
             <QRCode value={streamQR?.data} size={300} />
             <Text className={'text-center font-bold'}>{shiftName}</Text>
           </View>
@@ -50,7 +57,7 @@ function StreamQRScreen({ navigation, route }) {
           <Text className={'text-center text-muted-foreground'}>
             Thời gian hiện tại: <Text>{currentTime}</Text>
           </Text>
-        </View>
+        </Animated.View>
       )}
     </View>
   );

@@ -9,12 +9,19 @@ import { useTheme } from '../context/ThemeContext';
 import { Button } from '../components/ui/button';
 import { Text } from '../components/ui/text';
 import useShiftStore from '../store/shiftStore';
-import { Input } from '../components/ui/input';
-import { Ellipsis, QrCode } from 'lucide-react-native';
+import { QrCode } from 'lucide-react-native';
 import useAuthStore from '@/store/authStore';
+import Animated, {
+  FadeInDown,
+  FadeInLeft,
+} from 'react-native-reanimated';
+import { Badge } from '@/components/ui/badge';
 
 function ShiftScreen({ navigation }) {
   const { themeColor } = useTheme();
+  const { STATUS_TYPE, ROLE, SHIFT_TYPE_STRING } = useAuthStore(
+    state => state.config,
+  );
   const user = useAuthStore(state => state.user);
   const isLoading = useShiftStore(state => state.isLoading);
   const shifts = useShiftStore(state => state.shifts);
@@ -54,13 +61,17 @@ function ShiftScreen({ navigation }) {
           contentContainerClassName="flex-row gap-4"
         >
           {filterOptions.map((option, index) => (
-            <Button
-              key={index}
-              onPress={() => handleChoiceFilterOption(option.value)}
-              variant={option.isActive ? 'default' : 'outline'}
+            <Animated.View
+              key={option.value}
+              entering={FadeInLeft.delay(index * 100)}
             >
-              <Text>{option.label}</Text>
-            </Button>
+              <Button
+                onPress={() => handleChoiceFilterOption(option.value)}
+                variant={option.isActive ? 'default' : 'outline'}
+              >
+                <Text>{option.label}</Text>
+              </Button>
+            </Animated.View>
           ))}
         </ScrollView>
       </View>
@@ -76,27 +87,31 @@ function ShiftScreen({ navigation }) {
           {isLoading ? (
             <ActivityIndicator color={themeColor.primary} />
           ) : (
-            shifts?.map(shift => {
-              const isPending = shift?.userShifts?.find(us => us.type === 0);
-              const isRejected = shift?.userShifts.find(us => us.type === 2);
-              const isNoHasRequest = shift?.userShifts.some(
-                us => us.type === 0 || us.type === 1 || us.type === 2,
-              )
-                ? false
-                : true;
-              const isJoin = shift?.userShifts.find(us => us.type === 1);
+            shifts?.map((shift, index) => {
+              const isPending = shift?.userShifts?.find(
+                us => us.type === STATUS_TYPE.PENDING,
+              );
+
+              const isNoHasRequest = shift?.userShifts.every(
+                us =>
+                  us.type === STATUS_TYPE.CANCELLED ||
+                  us.type === STATUS_TYPE.REJECTED,
+              );
+
+              const isJoin = shift?.userShifts.find(
+                us => us.type === STATUS_TYPE.APPROVED,
+              );
               return (
-                <View
-                  style={{
-                    backgroundColor: themeColor.background,
-                    borderColor: themeColor.border,
-                  }}
+                <Animated.View
+                  entering={FadeInDown.delay(index * 200)}
                   key={shift.id}
-                  className="rounded-[12px] border px-4 py-2"
+                  className="rounded-[12px] px-4 py-2 border border-border"
                 >
                   <View className="p-4 mb-4  flex flex-row justify-between items-center">
                     <Text className="text-lg font-bold">{shift.name}</Text>
-                    <Text variant="muted">{shift.type}</Text>
+                    <Badge>
+                      <Text variant="">{SHIFT_TYPE_STRING[shift.type]}</Text>
+                    </Badge>
                   </View>
                   <View>
                     <Text variant="muted">
@@ -112,7 +127,7 @@ function ShiftScreen({ navigation }) {
                     </Text>
                   </View>
                   <View>
-                    <Text style={{ color: themeColor.mutedForeground }}>
+                    <Text variant="muted">
                       {shift.address || 'Chưa có địa điểm làm việc'}
                     </Text>
                   </View>
@@ -131,20 +146,26 @@ function ShiftScreen({ navigation }) {
                       <Button
                         className="flex-1"
                         variant="destructive"
-                        onPress={() => handleCancelJoinShift(isPending.id)}
+                        onPress={() =>
+                          handleCancelJoinShift(
+                            isPending.id,
+                            STATUS_TYPE.CANCELLED,
+                          )
+                        }
                       >
                         <Text>Hủy yêu cầu</Text>
                       </Button>
                     )}
-                    {isRejected && (
+                    {/* {isRejected && (
                       <Button variant="destructive" className="flex-1" disabled>
                         <Text>Yêu cầu bị từ chối</Text>
                       </Button>
-                    )}
+                    )} */}
                     {isJoin && (
                       <View className="flex-1 flex flex-row justify-between items-center">
                         <Text>Bạn đã tham gia</Text>
-                        {user.role >= 1 && (
+                        {(user.role === ROLE.MANAGER ||
+                          user.role === ROLE.ADMIN) && (
                           <Button
                             variant="outline"
                             onPress={() => {
@@ -160,7 +181,7 @@ function ShiftScreen({ navigation }) {
                       </View>
                     )}
                   </View>
-                </View>
+                </Animated.View>
               );
             })
           )}

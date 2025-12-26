@@ -1,0 +1,126 @@
+const { request } = require("@/utils/request");
+const { default: Toast } = require("react-native-toast-message");
+const { create } = require("zustand");
+
+
+
+
+const useLeaveRequestStore = create((set, get) => ({
+    leaveRequest: [],
+    isLoading: true,   
+    isRefreshing: false,
+    cursorId: null,
+    formData: {
+        startDate: new Date(),
+        endDate: new Date(),
+        leaveType: null,
+        reason: '',
+    },
+    setIsRefreshing: (isRefreshing) => set({ isRefreshing }),
+    setCursorId: (cursorId) => set({ cursorId }),
+    setLeaveRequest: (leaveRequest) => set({ leaveRequest }),
+    setIsLoading: (isLoading) => set({ isLoading }),
+    setFormData: (field) => {
+        set({
+            formData: {
+                ...get().formData,
+                ...field,
+            },
+        })
+    },
+
+    async handleGetLeaveRequestsCursorPagination() {
+        try {
+            const response = await request(`/leave-requests${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`)
+            const { data, cursorId } = response;
+            set({
+                leaveRequest: [...get().leaveRequest, ...data],
+                cursorId,
+            })
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+    },
+    async handleRefreshLeaveRequests() {
+        try {
+            const response = await request('/leave-requests')
+            const { data, cursorId } = response;
+            set({
+                leaveRequest: data,
+                cursorId,
+            })
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+    },
+    async handleCreateLeaveRequest() {
+        try {
+            const { formData } = get();
+            await request('/leave-requests', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Yêu cầu nghỉ phép đã được gửi thành công.',
+            });
+        } catch (error) {
+            console.log(error);
+            
+            set({
+                formData: {
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    leaveType: null,
+                    reason: '',
+                }
+            })
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+    },
+    async handleUpdateLeaveRequestStatus(id, status) {
+        try {
+            const response = await request(`/leave-requests/${id}/status`, {
+                method: 'POST',
+                body: JSON.stringify({ status }),
+            });
+            if (response.status !== 200) throw new Error('Cập nhật trạng thái yêu cầu nghỉ phép thất bại');
+            const newDate = get().leaveRequest.map(item => {
+                if (item.id === id) {
+                    return {
+                        ...item,
+                        status,
+                    }
+                }
+                return item;
+            });
+            set({ leaveRequest: newDate });
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+    },
+    async init() {
+        set({ leaveRequest: [], cursorId: null });
+        await get().handleGetLeaveRequestsCursorPagination();
+    }
+
+}))
+
+module.exports = useLeaveRequestStore;

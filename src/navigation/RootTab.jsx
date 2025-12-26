@@ -37,6 +37,7 @@ export default function RootTab() {
           tabBarIcon: ({ color, size }) => (
             <Clock color={color} size={size} />
           ),
+
         }}
       />
       <Tab.Screen

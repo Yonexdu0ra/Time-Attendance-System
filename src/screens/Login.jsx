@@ -21,23 +21,27 @@ export default function LoginScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const handlePressLogin = async () => {
     try {
-      const device = {
-        deviceId: DeviceInfo.getUniqueId(),
-        deviceName: await DeviceInfo.getDeviceName(),
-        platform: Platform.OS,
-        osVersion: DeviceInfo.getSystemVersion(),
-        appVersion: DeviceInfo.getVersion(),
-        isEmulator: await DeviceInfo.isEmulator(),
-      };
+      
+      // const device = {
+      //   deviceId: await DeviceInfo.getUniqueId(),
+      //   deviceName: await DeviceInfo.getDeviceName(),
+      //   platform: Platform.OS,
+      //   // osVersion: DeviceInfo.getSystemVersion(),
+      //   // appVersion: DeviceInfo.getVersion(),
+      //   // isEmulator: await DeviceInfo.isEmulator(),
+      // };
+      
       const data = await request('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'app-platform': Platform.OS,
+          'app-device-name': await DeviceInfo.getDeviceName(),
+          'app-device-id': await DeviceInfo.getUniqueId(),
         },
         body: JSON.stringify({
           identifier: formData.identifier,
           password: formData.password,
-          device,
         }),
       });
       accessTokenStore.getState().setAccessToken(data.data.accessToken);

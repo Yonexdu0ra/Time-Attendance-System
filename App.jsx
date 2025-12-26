@@ -16,7 +16,7 @@ import { PortalHost } from '@rn-primitives/portal'
 function App() {
   const init = useAuthStore(state => state.init);
   useEffect(() => {
-    init();
+   init();
   }, []);
   return (
     // <AuthProvider>

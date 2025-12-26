@@ -75,14 +75,14 @@ const useShiftStore = create((set, get) => ({
             });
         }
     },
-    handleCancelJoinShift: async (userShiftId) => {
+    handleCancelJoinShift: async (userShiftId, status) => {
         try {
             const shiftStatusData = await request(
                 `/user-shifts/requests/${userShiftId}/status`,
                 {
                     method: 'PUT',
                     body: JSON.stringify({
-                        status: 3,
+                        status
                     }),
                 },
             );
