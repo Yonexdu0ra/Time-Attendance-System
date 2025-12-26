@@ -7,7 +7,7 @@ const { create } = require("zustand");
 
 const useLeaveRequestStore = create((set, get) => ({
     leaveRequest: [],
-    isLoading: true,   
+    isLoading: true,
     isRefreshing: false,
     cursorId: null,
     formData: {
@@ -75,7 +75,7 @@ const useLeaveRequestStore = create((set, get) => ({
             });
         } catch (error) {
             console.log(error);
-            
+
             set({
                 formData: {
                     startDate: new Date(),
@@ -97,7 +97,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 method: 'POST',
                 body: JSON.stringify({ status }),
             });
-            if (response.status !== 200) throw new Error('Cập nhật trạng thái yêu cầu nghỉ phép thất bại');
+            if (response.code !== "SUCCESS") throw new Error('Cập nhật trạng thái yêu cầu nghỉ phép thất bại');
             const newDate = get().leaveRequest.map(item => {
                 if (item.id === id) {
                     return {
@@ -106,6 +106,11 @@ const useLeaveRequestStore = create((set, get) => ({
                     }
                 }
                 return item;
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: response.message,
             });
             set({ leaveRequest: newDate });
         } catch (error) {
