@@ -167,7 +167,10 @@ function LeaveRequestScreen({ navigation }) {
           </View>
 
           {/* SUBMIT */}
-          <Button onPress={handleCreateLeaveRequest}>
+          <Button onPress={() => {
+            handleCreateLeaveRequest(navigation);
+            navigation.goBack();
+          }}>
             <Text>Gửi yêu cầu</Text>
           </Button>
         </View>

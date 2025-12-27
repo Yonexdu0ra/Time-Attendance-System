@@ -10,7 +10,7 @@ function OvertimeRequestScreen({ navigation }) {
    <View className='relative flex-1'>
       
 
-      <Button variant={'outline'} className={'absolute bottom-5 right-5 z-50'}>
+      <Button variant={'outline'} className={'absolute bottom-5 right-5 z-50'} onPress={() => navigation.push('RequestOvertimeCreate')}>
         <Plus />
       </Button>
     </View>
