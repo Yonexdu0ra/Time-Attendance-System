@@ -46,6 +46,8 @@ export default function LoginScreen({ navigation }) {
       });
       accessTokenStore.getState().setAccessToken(data.data.accessToken);
       useAuthStore.setState({ user: data.data.user });
+      const configData = await request('/config')
+      useAuthStore.setState({ config: configData.data });
       await saveRefreshToken(data.data.refreshToken);
       Toast.show({
         type: 'success',

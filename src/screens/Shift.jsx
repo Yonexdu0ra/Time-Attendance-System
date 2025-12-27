@@ -105,7 +105,7 @@ function ShiftScreen({ navigation }) {
                 <Animated.View
                   entering={FadeInDown.delay(index * 200)}
                   key={shift.id}
-                  className="rounded-[12px] px-4 py-2 border border-border"
+                  className="rounded-[12px] px-4 py-2 border border-border bg-background"
                 >
                   <View className="p-4 mb-4  flex flex-row justify-between items-center">
                     <Text className="text-lg font-bold">{shift.name}</Text>

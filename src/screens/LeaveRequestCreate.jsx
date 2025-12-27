@@ -64,14 +64,14 @@ function LeaveRequestScreen({ navigation }) {
 
     setFormData({
       startDate: show.startDate ? date : safeStartDate,
-      endDate:  show.endDate ? date : safeEndDate,
+      endDate: show.endDate ? date : safeEndDate,
     });
 
     setShow({ startDate: false, endDate: false });
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 p-4 bg-background">
       <ScrollView className="bg-secondary">
         {/* START DATE PICKER */}
         {show.startDate && (
@@ -167,14 +167,16 @@ function LeaveRequestScreen({ navigation }) {
           </View>
 
           {/* SUBMIT */}
-          <Button onPress={() => {
-            handleCreateLeaveRequest(navigation);
-            navigation.goBack();
-          }}>
-            <Text>Gửi yêu cầu</Text>
-          </Button>
         </View>
       </ScrollView>
+      <Button
+        onPress={() => {
+          handleCreateLeaveRequest(navigation);
+          navigation.goBack();
+        }}
+      >
+        <Text>Gửi yêu cầu</Text>
+      </Button>
     </View>
   );
 }

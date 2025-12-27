@@ -1,26 +1,28 @@
-import { Progress } from '@/components/ui/progress';
+
 import { Text } from '@/components/ui/text';
-import useCurrentTime from '@/hooks/useCurrrentTime';
-import useTimeCountDown from '@/hooks/useTimeCountDown';
+import useTimeProgress from '@/hooks/useTimeProgess';
 import accessTokenStore from '@/store/accessTokenStore';
 import useStreamQRStore from '@/store/streamQRStore';
 import formatTime from '@/utils/formatTime';
 import { useEffect, useLayoutEffect } from 'react';
 import { View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+} from 'react-native-reanimated';
+import * as Progress from 'react-native-progress';
+
 function StreamQRScreen({ navigation, route }) {
   const { shiftId, shiftName } = route.params;
   const accessToken = accessTokenStore(state => state.accessToken);
-
-  //   const setAccessToken = useStreamQRStore(state => state.setAccessToken);
   const streamQR = useStreamQRStore(state => state.streamQR);
-  const { progress, setTargetDate } = useTimeCountDown(streamQR?.expired);
+  const progress = useTimeProgress(streamQR?.expired, 500);
   const isLoading = useStreamQRStore(state => state.isLoading);
   const startStream = useStreamQRStore(state => state.startStream);
   const stopStream = useStreamQRStore(state => state.stopStream);
 
-  const currentTime = useCurrentTime();
+
+  
   useEffect(() => {
     if (shiftId) {
       //   setAccessToken(accessToken);
@@ -42,7 +44,10 @@ function StreamQRScreen({ navigation, route }) {
       {isLoading ? (
         <Text>Đang tải mã QR...</Text>
       ) : (
-        <Animated.View entering={FadeInDown.delay(100)} className="items-center justify-center gap-2">
+        <Animated.View
+          entering={FadeInDown.delay(100)}
+          className="items-center justify-center gap-2"
+        >
           <View className="border p-2 rounded-lg gap-2 bg-secondary">
             <QRCode value={streamQR?.data} size={300} />
             <Text className={'text-center font-bold'}>{shiftName}</Text>
@@ -50,12 +55,10 @@ function StreamQRScreen({ navigation, route }) {
           <Text className={'text-center text-muted-foreground'}>
             Quét mã này để chấm công
           </Text>
+          <Progress.Pie   progress={progress} size={100} />
           <Text className={'text-center text-muted-foreground'}>
-            Mã QR sẽ được làm mới lúc:{' '}
+            Mã sẽ được làm mới lúc:
             <Text>{formatTime(new Date(streamQR?.expired))}</Text>
-          </Text>
-          <Text className={'text-center text-muted-foreground'}>
-            Thời gian hiện tại: <Text>{currentTime}</Text>
           </Text>
         </Animated.View>
       )}

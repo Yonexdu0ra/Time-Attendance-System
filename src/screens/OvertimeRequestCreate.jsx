@@ -1,24 +1,26 @@
 import { Text } from '@/components/ui/text';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useLayoutEffect, useState } from 'react';
+import { Platform, ScrollView, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
+import useOvertimeRequestStore from '@/store/overtimeRequestStore';
+import { useTheme } from '@/context/ThemeContext';
 LocaleConfig.locales['vi'] = {
   monthNames: [
-    'Tháng Một',
-    'Tháng Hai',
-    'Tháng Ba',
-    'Tháng Tư',
-    'Tháng Năm',
-    'Tháng Sáu',
-    'Tháng Bảy',
-    'Tháng Tám',
-    'Tháng Chín',
-    'Tháng Mười',
-    'Tháng Mười Một',
-    'Tháng Mười Hai',
+    'Tháng 1',
+    'Tháng 2',
+    'Tháng 3',
+    'Tháng 4',
+    'Tháng 5',
+    'Tháng 6',
+    'Tháng 7',
+    'Tháng 8',
+    'Tháng 9',
+    'Tháng 10',
+    'Tháng 11',
+    'Tháng 12',
   ],
   monthNamesShort: [
     'Tháng 1',
@@ -48,14 +50,55 @@ LocaleConfig.locales['vi'] = {
 };
 
 LocaleConfig.defaultLocale = 'vi';
-function OvertimeRequestScreen() {
+function OvertimeRequestScreen({ navigation }) {
   const [selected, setSelected] = useState('');
   const [isShowCalendar, setIsShowCalendar] = useState(false);
   const minDate = new Date().toISOString().split('T')[0];
+  const formData = useOvertimeRequestStore(state => state.formData);
+  const setFormData = useOvertimeRequestStore(state => state.setFormData);
+  const handleCreateOvertimeRequest = useOvertimeRequestStore(
+    state => state.handleCreateOvertimeRequest,
+  );
+  const { themeColor } = useTheme();
   const [show, setShow] = useState({
     timeStart: false,
     timeEnd: false,
   });
+  const onChange = (event, selectedDate) => {
+    // Android có dismissed / set
+    if (event.type !== 'set') {
+      setShow({ startDate: false, endDate: false });
+      return;
+    }
+
+    const date =
+      Platform.OS === 'android'
+        ? new Date(event.nativeEvent.timestamp)
+        : selectedDate;
+
+    if (!date || isNaN(date)) {
+      setShow({ startDate: false, endDate: false });
+      return;
+    }
+
+    setFormData({
+      timeStart: show.timeStart ? date : safeTimeStart,
+      timeEnd: show.timeEnd ? date : safeTimeEnd,
+    });
+
+    setShow({ timeStart: false, timeEnd: false });
+  };
+  const safeTimeStart =
+    formData.timeStart instanceof Date ? formData.timeStart : new Date();
+
+  const safeTimeEnd =
+    formData.timeEnd instanceof Date ? formData.timeEnd : safeTimeStart;
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Yêu cầu làm thêm giờ',
+      headerShown: true,
+    });
+  }, [navigation]);
   return (
     <View className="flex-1 p-4 gap-4 bg-background">
       <ScrollView
@@ -64,14 +107,16 @@ function OvertimeRequestScreen() {
       >
         {show.timeStart && (
           <RNDateTimePicker
+            onChange={onChange}
             mode="time"
-            value={new Date()}
+            value={safeTimeStart}
           />
         )}
         {show.timeEnd && (
           <RNDateTimePicker
-            mode="time" 
-            value={new Date()}
+            onChange={onChange}
+            mode="time"
+            value={safeTimeEnd}
           />
         )}
         <Text>Ngày tăng ca</Text>
@@ -79,33 +124,60 @@ function OvertimeRequestScreen() {
           <Calendar
             minDate={minDate}
             onDayPress={day => {
-              setSelected(day.dateString);
+              console.log(day);
+
+              // setSelected(day.dateString);
+              setFormData({
+                date: new Date(day.timestamp),
+              });
               setIsShowCalendar(false);
             }}
             markedDates={{
-              [selected]: {
-                selected: true,
-                selectedColor: 'green',
-                marked: true,
-              },
+              [formData.date ? formData.date.toISOString().split('T')[0] : '']:
+                {
+                  selected: true,
+                  selectedColor: themeColor.primary,
+                  // marked: true,
+                },
             }}
           />
         ) : (
-          <Input
-            value={selected}
-            onPressIn={() => setIsShowCalendar(true)}
-            placeholder="Chọn ngày làm thêm"
-            disabled
-          />
+          <Button onPress={() => setIsShowCalendar(true)} variant={'outline'}>
+            <Text>{selected || 'Chọn ngày làm thêm'}</Text>
+          </Button>
         )}
         <View className="flex flex-row gap-4">
           <View className="flex-1">
             <Text>Giờ bắt đầu</Text>
-            <Input disabled onPressIn={() => setShow(prev => ({ ...prev, timeStart: true }))} placeholder="Chọn giờ bắt đầu" />
+
+            <Button
+              variant={'outline'}
+              onPress={() =>
+                setShow(prev => ({ timeStart: true, timeEnd: false }))
+              }
+            >
+              <Text>
+                {safeTimeStart
+                  ? safeTimeStart.toLocaleTimeString()
+                  : 'Chọn giờ bắt đầu'}
+              </Text>
+            </Button>
           </View>
           <View className="flex-1">
             <Text>Giờ kết thúc</Text>
-            <Input disabled onPressIn={() => setShow(prev => ({ ...prev, timeEnd: true }))} placeholder="Chọn giờ kết thúc" />
+
+            <Button
+              variant={'outline'}
+              onPress={() =>
+                setShow(prev => ({ timeStart: false, timeEnd: true }))
+              }
+            >
+              <Text>
+                {safeTimeEnd
+                  ? safeTimeEnd.toLocaleTimeString()
+                  : 'Chọn giờ kết thúc'}
+              </Text>
+            </Button>
           </View>
         </View>
         <View>
@@ -116,10 +188,16 @@ function OvertimeRequestScreen() {
             numberOfLines={4}
             textAlignVertical="top"
             placeholder="Nhập lý do tăng ca của bạn để có thể giúp quản lý phê duyệt yêu cầu nhanh hơn"
+            onChangeText={text => setFormData({ reason: text })}
+            // value={formData.reason}
           />
         </View>
       </ScrollView>
-      <Button>
+      <Button
+        onPress={() => {
+          handleCreateOvertimeRequest()
+        }}
+      >
         <Text>Gửi yêu cầu</Text>
       </Button>
     </View>
