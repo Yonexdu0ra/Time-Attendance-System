@@ -53,9 +53,9 @@ function StreamQRScreen({ navigation, route }) {
             <Text className={'text-center font-bold'}>{shiftName}</Text>
           </View>
           <Text className={'text-center text-muted-foreground'}>
-            Quét mã này để chấm công
+            Quét mã qr để chấm công
           </Text>
-          <Progress.Pie   progress={progress} size={100} />
+          <Progress.Pie   progress={progress} size={50}  />
           <Text className={'text-center text-muted-foreground'}>
             Mã sẽ được làm mới lúc:
             <Text>{formatTime(new Date(streamQR?.expired))}</Text>

@@ -51,7 +51,6 @@ LocaleConfig.locales['vi'] = {
 
 LocaleConfig.defaultLocale = 'vi';
 function OvertimeRequestScreen({ navigation }) {
-  const [selected, setSelected] = useState('');
   const [isShowCalendar, setIsShowCalendar] = useState(false);
   const minDate = new Date().toISOString().split('T')[0];
   const formData = useOvertimeRequestStore(state => state.formData);
@@ -143,7 +142,7 @@ function OvertimeRequestScreen({ navigation }) {
           />
         ) : (
           <Button onPress={() => setIsShowCalendar(true)} variant={'outline'}>
-            <Text>{selected || 'Chọn ngày làm thêm'}</Text>
+            <Text>{formData.date ? formData.date.toISOString().split('T')[0] : 'Chọn ngày làm thêm'}</Text>
           </Button>
         )}
         <View className="flex flex-row gap-4">

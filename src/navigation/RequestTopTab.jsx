@@ -20,6 +20,7 @@ function RequestTopTab({ navigation }) {
         component={OvertimeRequestScreen}
         options={{
           title: 'Tăng ca',
+          lazy: true,
           // swipeEnabled: false
         }}
       />

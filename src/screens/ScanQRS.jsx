@@ -1,5 +1,6 @@
 import Corner from '@/components/ui/Coner';
 import { Text } from '@/components/ui/text';
+import useAttendanceStore from '@/store/useAttendanceStore';
 import { useEffect, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -8,16 +9,13 @@ import {
   useCodeScanner,
   useCameraPermission,
   useCameraDevice,
-  useCameraDevices,
-  useCameraFormat,
-  getCameraDevice,
 } from 'react-native-vision-camera';
 
 function ScanQRScreen({ navigation }) {
   const { hasPermission, requestPermission } = useCameraPermission();
   const { width } = useWindowDimensions();
   const [scanned, setScanned] = useState(false);
-
+  const handleAttandance = useAttendanceStore(state => state.handleAttandance);
   const device = useCameraDevice('back', {
     physicalDevices: [
       'wide-angle-camera',
@@ -31,11 +29,12 @@ function ScanQRScreen({ navigation }) {
     codeTypes: ['qr'],
     onCodeScanned: codes => {
       if (!scanned && codes.length > 0) {
-        Toast.show({
-          type: 'success',
-          text1: 'Quét mã QR thành công',
-          text2: `Giá trị: ${codes[0].value}`,
-        });
+        // Toast.show({
+        //   type: 'success',
+        //   text1: 'Quét mã QR thành công',
+        //   text2: `Giá trị: ${codes[0].value}`,
+        // });
+        handleAttandance(codes[0].value)
         setScanned(true);
         navigation.goBack();
       }

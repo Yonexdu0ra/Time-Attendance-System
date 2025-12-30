@@ -31,7 +31,7 @@ const useStreamQRStore = create((set, get) => ({
             timeout: 300000,
             debug: true,
             pollingInterval: 100,
-        
+
         });
 
         es.addEventListener('open', () => {
@@ -43,7 +43,7 @@ const useStreamQRStore = create((set, get) => ({
             try {
                 const data = JSON.parse(event.data);
                 console.log(data);
-                
+
                 set({ streamQR: data, isLoading: false });
             } catch (error) {
                 return
@@ -53,7 +53,11 @@ const useStreamQRStore = create((set, get) => ({
 
         es.addEventListener('error', async (err) => {
             if (err.type === "error" && err.xhrStatus === 401 && get().retryCount < 3) {
-
+                if (get().retryCount >= 3) {
+                    es.close()
+                    set({ isLoading: false });
+                    return;
+                }
                 try {
                     const refreshToken = await getRefreshToken();
                     if (refreshToken) {
@@ -61,14 +65,14 @@ const useStreamQRStore = create((set, get) => ({
                         set({ retryCount: 0 });
                         return
                     }
-                    set({ retryCount: get().retryCount + 1 });
 
 
                 } catch (error) {
                     console.log(error);
-                    es.close()
+
                     set({ isLoading: false, retryCount: 0 });
                 }
+                set({ retryCount: get().retryCount + 1 });
 
             }
             set({ isLoading: false });
