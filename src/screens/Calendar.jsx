@@ -3,11 +3,13 @@ import { Text } from '@/components/ui/text';
 import { useTheme } from '@/context/ThemeContext';
 import useAuthStore from '@/store/authStore';
 import useHolidayStore from '@/store/holidayStore';
-import useShiftAttendanceStore from '@/store/shiftAttandanceStore';
-import { useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
-import { Calendar, LocaleConfig, Agenda } from 'react-native-calendars';
+import useShiftAttendanceStore from '@/store/shiftAttendanceStore';
+import { useEffect, useMemo, useState } from 'react';
+import { FlatList, RefreshControl, View } from 'react-native';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+
+/* ---------- Locale ---------- */
 LocaleConfig.locales['vi'] = {
   monthNames: [
     'Tháng Một',
@@ -23,202 +25,193 @@ LocaleConfig.locales['vi'] = {
     'Tháng Mười Một',
     'Tháng Mười Hai',
   ],
-  monthNamesShort: [
-    'Tháng 1',
-    'Tháng 2',
-    'Tháng 3',
-    'Tháng 4',
-    'Tháng 5',
-    'Tháng 6',
-    'Tháng 7',
-    'Tháng 8',
-    'Tháng 9',
-    'Tháng 10',
-    'Tháng 11',
-    'Tháng 12',
-  ],
-  dayNames: [
-    'Chủ Nhật',
-    'Thứ Hai',
-    'Thứ Ba',
-    'Thứ Tư',
-    'Thứ Năm',
-    'Thứ Sáu',
-    'Thứ Bảy',
-  ],
   dayNamesShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-  today: 'Hôm nay',
 };
-
 LocaleConfig.defaultLocale = 'vi';
-function CalendarScreen({ navigation }) {
+
+function CalendarScreen() {
   const [selected, setSelected] = useState(
     new Date().toISOString().split('T')[0],
   );
+
   const {
     SHIFT_ATTENDANCE_STATUS_STRING,
     SHIFT_ATTENDANCE_TYPE_STRING,
-    LEAVE_TYPE_STRING,
-    SHIFT_ATTENDANCE_STATUS,
-    SHIFT_ATTENDANCE_TYPE,
-    LEAVE_TYPE,
-    STATUS_TYPE_STRING,
     SHIFT_TYPE_STRING,
   } = useAuthStore(state => state.config);
+
   const holidayInit = useHolidayStore(state => state.init);
   const holidays = useHolidayStore(state => state.holidays);
+
   const shiftAttendanceInit = useShiftAttendanceStore(state => state.init);
   const shiftAttendances = useShiftAttendanceStore(
     state => state.shiftAttendances,
   );
-
-  const { themeColor } = useTheme();
   const isRefreshing = useShiftAttendanceStore(state => state.isRefreshing);
   const handleRefreshShiftAttendances = useShiftAttendanceStore(
     state => state.handleRefreshShiftAttendances,
   );
-  const markedDates = {
-    [selected]: { selected: true, selectedColor: themeColor.primary },
-  };
-  holidays.forEach(holiday => {
-    const dateKey = holiday.date.split('T')[0];
-    if (!(dateKey in markedDates)) {
-      markedDates[dateKey] = {
-        marked: true,
-        dotColor: 'red',
-        selected: selected === dateKey,
-        dots: [
-          {
-            key: holiday.id,
-            type: 'holiday',
-            color: 'red',
-            selectedDotColor: 'red',
-            name: holiday.name,
-          },
-        ],
-      };
-    } else {
-      markedDates[dateKey] = {
-        ...markedDates[dateKey],
-        selected: selected === dateKey,
-        dots: [
-          ...(markedDates[dateKey].dots || []),
-          {
-            key: holiday.id,
-            type: 'holiday',
-            color: 'red',
-            selectedDotColor: 'red',
-            name: holiday.name,
-          },
-        ],
-      };
-    }
-  });
 
-  shiftAttendances.forEach(attendance => {
-    const dateKey = attendance.attendAt.split('T')[0];
-    if (!(dateKey in markedDates)) {
-      markedDates[dateKey] = {
-        marked: true,
-        dotColor: 'blue',
-        selected: selected === dateKey,
-        dots: [
-          {
-            key: attendance.id,
-            type: 'shiftAttendance',
-            color: 'blue',
-            selectedDotColor: 'blue',
-            name: attendance.shift.name,
-          },
-        ],
-      };
-    } else {
-      markedDates[dateKey] = {
-        ...markedDates[dateKey],
-        selected: selected === dateKey,
-        dots: [
-          ...(markedDates[dateKey].dots || []),
-          {
-            key: attendance.id,
-            type: 'shiftAttendance',
-            color: 'blue',
-            selectedDotColor: 'blue',
-            name: attendance.shift.name,
-          },
-        ],
-      };
-    }
-  });
-  const markedDateChoice = markedDates[selected]?.dots;
+  const { themeColor } = useTheme();
 
   useEffect(() => {
     holidayInit();
     shiftAttendanceInit();
   }, []);
-  return (
-    <View className="flex-1 px-4 pt-4 bg-background">
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefreshShiftAttendances}
-          />
-        }
-      >
-        <Calendar
-          onDayPress={day => {
-            setSelected(day.dateString);
-          }}
-          markingType="multi-dot"
-          markedDates={markedDates}
-        />
 
-        <Text>Thông tin</Text>
-        <View>
-          {!markedDateChoice && (
-            <Text>Không có dữ liệu cho ngày: {selected}</Text>
+  /* ---------- Marked dates ---------- */
+  const markedDates = useMemo(() => {
+    const result = {
+      [selected]: { selected: true, selectedColor: themeColor.primary },
+    };
+
+    holidays.forEach(h => {
+      const d = h.date.split('T')[0];
+      result[d] = {
+        ...(result[d] || {}),
+        marked: true,
+        dots: [
+          ...(result[d]?.dots || []),
+          {
+            key: h.id,
+            color: themeColor.error, // đỏ theo theme
+            name: h.name,
+          },
+        ],
+      };
+    });
+
+    shiftAttendances.forEach(a => {
+      const d = a.attendAt.split('T')[0];
+      result[d] = {
+        ...(result[d] || {}),
+        marked: true,
+        dots: [
+          ...(result[d]?.dots || []),
+          {
+            key: a.id,
+            color: themeColor.primary, // xanh theo theme
+            name: a.shift.name,
+          },
+        ],
+      };
+    });
+
+    return result;
+  }, [holidays, shiftAttendances, selected, themeColor]);
+
+  const selectedItems = markedDates[selected]?.dots || [];
+
+  return (
+    <FlatList
+      className="flex-1 px-4 bg-background"
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefreshShiftAttendances}
+          tintColor={themeColor.primary}
+        />
+      }
+      ListHeaderComponent={
+        <>
+          {/* Calendar */}
+          <Calendar
+            key={themeColor.background} // đổi key sẽ force re-render khi theme thay đổi
+            markingType="multi-dot"
+            markedDates={markedDates}
+            onDayPress={d => setSelected(d.dateString)}
+            theme={{
+              backgroundColor: themeColor.background,
+              calendarBackground: themeColor.background,
+              textSectionTitleColor: themeColor.foreground,
+              textSectionTitleDisabledColor: themeColor.mutedForeground,
+              dayTextColor: themeColor.foreground,
+              textDisabledColor: themeColor.mutedForeground,
+              todayTextColor: themeColor.primary,
+              selectedDayBackgroundColor: themeColor.primary,
+              selectedDayTextColor: themeColor.primaryForeground,
+              monthTextColor: themeColor.foreground,
+              arrowColor: themeColor.primary,
+              dotColor: themeColor.primary,
+              selectedDotColor: themeColor.primaryForeground,
+              textDayFontWeight: '500',
+              textMonthFontWeight: '600',
+              textDayHeaderFontWeight: '600',
+              textDayFontSize: 14,
+              textMonthFontSize: 16,
+              textDayHeaderFontSize: 14,
+            }}
+          />
+
+          {/* Info Section */}
+          <Text className="mt-4 mb-2 text-lg font-semibold">
+            Thông tin ngày {selected}
+          </Text>
+
+          {selectedItems.length === 0 && (
+            <Text className="text-muted-foreground mb-4">
+              Không có dữ liệu cho ngày này
+            </Text>
           )}
-          {markedDateChoice &&
-            markedDateChoice.map((item, index) => (
-              <Animated.View
-                entering={FadeInUp.delay(index * 100)}
-                key={item.key}
-                className="p-2 my-2 border rounded-lg border-gray-300"
-              >
-                <Text className="font-bold">{item.name}</Text>
-              </Animated.View>
-            ))}
-        </View>
-        <Text>Lịch sử chấm công</Text>
-        <View>
-          {shiftAttendances?.map((attendance, index) => (
+        </>
+      }
+      data={selectedItems}
+      keyExtractor={item => item.key.toString()}
+      renderItem={({ item, index }) => (
+        <Animated.View
+          entering={FadeInUp.delay(index * 80)}
+          className="mb-2 p-3 rounded-xl bg-card border border-border"
+        >
+          <View className="flex-row items-center">
+            <View
+              className="w-2 h-2 rounded-full mr-2"
+              style={{ backgroundColor: item.color }}
+            />
+            <Text className="font-medium">{item.name}</Text>
+          </View>
+        </Animated.View>
+      )}
+      ListFooterComponent={
+        <>
+          <Text className="mt-6 mb-2 text-lg font-semibold">
+            Lịch sử chấm công
+          </Text>
+
+          {shiftAttendances.length === 0 && (
+            <Text className="text-muted-foreground">
+              Chưa có dữ liệu chấm công
+            </Text>
+          )}
+
+          {shiftAttendances.map((attendance, index) => (
             <Animated.View
-              entering={FadeInUp.delay(index * 100)}
+              entering={FadeInUp.delay(index * 80)}
               key={attendance.id}
-              className="p-2 my-2 border rounded-lg "
+              className="mb-3 p-4 rounded-2xl bg-card border border-border"
             >
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="font-bold">{attendance.shift.name}</Text>
-                <Badge variant={'outline'}>
+                <Text className="font-semibold text-base">
+                  {attendance.shift.name}
+                </Text>
+                <Badge variant="outline">
                   <Text>{SHIFT_TYPE_STRING[attendance.shift.type]}</Text>
                 </Badge>
               </View>
-              <Text>
-                Chấm công lúc: <Text>{attendance.attendAt}</Text>
+
+              <Text className="text-sm text-muted-foreground">
+                Chấm công lúc: {attendance.attendAt}
               </Text>
-              <Text>
-                Loại{' '}
-                <Text>{SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}</Text>
+              <Text className="text-sm text-muted-foreground">
+                Loại: {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}
               </Text>
-              <Text>
-                Trạng thái:{' '}
-                <Text>{SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}</Text>
+              <Text className="text-sm text-muted-foreground">
+                Trạng thái: {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
               </Text>
             </Animated.View>
           ))}
-        </View>
-      </ScrollView>
-    </View>
+        </>
+      }
+    />
   );
 }
 

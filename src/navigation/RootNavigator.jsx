@@ -13,6 +13,9 @@ import ScanQRScreen from '@/screens/ScanQRS';
 import StreamQRScreen from '@/screens/StreamQR';
 import LeaveRequestCreate from '@/screens/LeaveRequestCreate';
 import OvertimeRequestCreate from '@/screens/OvertimeRequestCreate';
+import QrCodeProfileScreen from '@/screens/QrCodeProfile';
+import SettingScreen from '@/screens/Settings';
+import { useTheme } from '@/context/ThemeContext';
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
@@ -37,9 +40,24 @@ function AuthStack() {
 }
 
 function UserStack() {
+  const { themeColor } = useTheme();
   return (
     <Stack.Navigator
-      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+        headerStyle: { backgroundColor: themeColor.background },
+        headerTintColor: themeColor.foreground,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+          color: themeColor.foreground,
+        },
+        tabBarStyle: { backgroundColor: themeColor.background },
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+        gestureResponseDistance: 200,
+        detachPreviousScreen: true,
+      }}
       initialRouteName="RootTab"
     >
       <Stack.Screen name="RootTab" component={RootTab} />
@@ -51,14 +69,32 @@ function UserStack() {
         name="RequestOvertimeCreate"
         component={OvertimeRequestCreate}
       />
+      <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingScreen} />
     </Stack.Navigator>
   );
 }
 
 function ManagerStack() {
+  const { themeColor } = useTheme();
   return (
     <Stack.Navigator
-      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+        headerStyle: { backgroundColor: themeColor.background },
+        headerTintColor: themeColor.foreground,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+          color: themeColor.foreground,
+        },
+        tabBarStyle: { backgroundColor: themeColor.background },
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+        gestureResponseDistance: 200,
+        detachPreviousScreen: true,
+
+      }}
       initialRouteName="RootTab"
     >
       <Stack.Screen name="RootTab" component={RootTab} />
@@ -70,6 +106,8 @@ function ManagerStack() {
         name="RequestOvertimeCreate"
         component={OvertimeRequestCreate}
       />
+      <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingScreen} />
     </Stack.Navigator>
   );
 }

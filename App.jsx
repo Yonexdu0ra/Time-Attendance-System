@@ -12,20 +12,23 @@ import ThemeProvider from './src/context/ThemeContext';
 import Toast from 'react-native-toast-message';
 import useAuthStore from './src/store/authStore';
 import { useEffect } from 'react';
-import { PortalHost } from '@rn-primitives/portal'
+import { PortalHost } from '@rn-primitives/portal';
+import NotificationProvider from '@/context/NotificationContext';
 function App() {
   const init = useAuthStore(state => state.init);
   useEffect(() => {
-   init();
+    init();
   }, []);
   return (
     // <AuthProvider>
     <ThemeProvider>
-      <NavigationContainer>
-        <RootNavigator />
-        <Toast position='bottom' />
-      </NavigationContainer>
-      <PortalHost />
+      <NotificationProvider>
+        <NavigationContainer>
+          <RootNavigator />
+          <Toast position="top" />
+        </NavigationContainer>
+        <PortalHost />
+      </NotificationProvider>
     </ThemeProvider>
     // </AuthProvider>
   );

@@ -1,7 +1,6 @@
-const { request } = require("@/utils/request");
-const { default: Toast } = require("react-native-toast-message");
-const { create } = require("zustand");
-
+import { request } from '@/utils/request'
+import Toast from 'react-native-toast-message'
+import { create } from 'zustand'
 
 
 const useOvertimeRequestStore = create((set, get) => ({
@@ -34,7 +33,7 @@ const useOvertimeRequestStore = create((set, get) => ({
             const updatedOvertimeRequests = get().cursorId ? [...get().overtimeRequest, ...newOvertimeRequests] : newOvertimeRequests;
             set({
                 overtimeRequest: updatedOvertimeRequests,
-                cursorId: newOvertimeRequests.length > 0 ? newOvertimeRequests[newOvertimeRequests.length - 1].id : null,
+                cursorId: response.nextCursorId,
             });
         } catch (error) {
             Toast.show({
@@ -44,7 +43,7 @@ const useOvertimeRequestStore = create((set, get) => ({
             });
         }
     },
-    handleRefreshOvertimeRequest: async () => {
+    handleRefreshOvertimeRequests: async () => {
         set({ isRefreshing: true, cursorId: null });
         await get().handleGetOvertimeRequestCursorPagination();
         set({ isRefreshing: false });

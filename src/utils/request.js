@@ -4,6 +4,7 @@ import {
   saveRefreshToken,
   clearRefreshToken,
 } from '../utils/token';
+import { storage } from './storage';
 
 export const API_URL = process.env.API_URL || 'http://192.168.1.73:3000/api/v1';
 
@@ -27,7 +28,7 @@ function createError({ status, code, message, raw }) {
 // ===== refresh token =====
 async function refreshAccessToken() {
   const refreshToken = await getRefreshToken();
-  
+
   if (!refreshToken) throw new Error('NO_REFRESH_TOKEN');
 
   const res = await fetch(`${API_URL}/auth/refresh-token`, {
@@ -39,8 +40,9 @@ async function refreshAccessToken() {
   if (!res.ok) throw new Error('REFRESH_FAILED');
 
   const data = await res.json();
-  
+
   if (data.data?.refreshToken) {
+    storage.set('accessToken', data.data.accessToken);
     await saveRefreshToken(data.data.refreshToken);
   }
 
@@ -50,7 +52,7 @@ async function refreshAccessToken() {
 // ===== MAIN REQUEST =====
 export async function request(path, options = {}) {
   try {
-    const accessToken = accessTokenStore?.getState?.()?.accessToken;
+    const accessToken = accessTokenStore?.getState?.()?.accessToken || storage.getString('accessToken')
 
     const res = await fetch(`${API_URL}${path}`, {
       ...options,

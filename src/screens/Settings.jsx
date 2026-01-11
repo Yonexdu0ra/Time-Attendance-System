@@ -1,0 +1,10 @@
+import { Text } from "@/components/ui/text";
+import { View } from "react-native";
+
+function SettingScreen() {
+    return <View>
+        <Text>Setting Screen</Text>
+    </View>
+}
+
+export default SettingScreen;

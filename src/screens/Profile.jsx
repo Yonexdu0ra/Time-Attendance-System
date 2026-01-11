@@ -1,16 +1,37 @@
 import { useLayoutEffect, useState } from 'react';
-import { Image, ScrollView, View } from 'react-native';
+import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import useAuthStore from '../store/authStore';
 import { Text } from '@/components/ui/text';
 import { Switch } from '@/components/ui/switch';
+import { QrCode, Settings } from 'lucide-react-native';
 
 function ProfileScreen({ navigation }) {
   const user = useAuthStore.getState().user;
   const { themeColor, toggleColorScheme, theme } = useTheme();
   const logout = useAuthStore(state => state.logout);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          className="font-bold ml-4 "
+          onPress={() => navigation.getParent()?.push('QrCodeProfile')}
+        >
+          <QrCode size={24} color={themeColor.foreground} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          className="font-bold mr-4 "
+          onPress={() => navigation.getParent()?.push('Settings')}
+        >
+          <Settings size={24} color={themeColor.foreground} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, themeColor]);
   return (
     <View
       className="flex-1 justify-center items-center"
@@ -74,7 +95,11 @@ function ProfileScreen({ navigation }) {
         <Button className="mt-4">
           <Text>Cập nhật</Text>
         </Button>
-        <Button className={'mt-4'} onPress={() => logout()} variant="destructive">
+        <Button
+          className={'mt-4'}
+          onPress={() => logout()}
+          variant="destructive"
+        >
           <Text>Đăng xuất</Text>
         </Button>
       </ScrollView>

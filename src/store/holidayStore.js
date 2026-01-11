@@ -1,7 +1,8 @@
 import { request } from "@/utils/request";
 import Toast from "react-native-toast-message";
+import { create } from "zustand";
 
-const { create } = require("zustand");
+
 
 
 
@@ -19,9 +20,10 @@ const useHolidayStore = create((set, get) => ({
             set({ isLoading: true });
             const response = await request(`/holidays${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`);
             const newHolidays = response.data || [];
+
             set({
                 holidays: [...get().holidays, ...newHolidays],
-                cursorId: newHolidays.length > 0 ? newHolidays[newHolidays.length - 1].id : null,
+                cursorId: response.nextCursorId,
             });
         } catch (error) {
             Toast.show({
@@ -36,10 +38,10 @@ const useHolidayStore = create((set, get) => ({
         }
     },
     handleRefreshHolidays: async () => {
-        set({ isRefreshing: true, cursorId: null });
+        set({ isRefreshing: true, cursorId: null, holidays: [] });
         try {
             const response = await request('/holidays');
-            set({ holidays: response.data || [] });
+            set({ holidays: response.data || [], cursorId: response.nextCursorId });
         }
         catch (error) {
             Toast.show({
@@ -54,15 +56,7 @@ const useHolidayStore = create((set, get) => ({
         }
     },
     init: async () => {
-        set({ isLoading: true });
-        try {
-            const response = await request('/holidays');
-            set({ holidays: response.data || [] });
-        }
-        catch (error) {
-            console.log(error);
-        }
-        set({ isLoading: false });
+        get().handleRefreshHolidays();
     }
 }));
 

@@ -1,59 +1,83 @@
 import { DarkTheme, DefaultTheme } from '@react-navigation/native';
- 
+
 export const THEME = {
   light: {
     background: 'hsl(0 0% 100%)',
-    foreground: 'hsl(0 0% 3.9%)',
+    foreground: 'hsl(210 11% 15%)',
+    
     card: 'hsl(0 0% 100%)',
-    cardForeground: 'hsl(0 0% 3.9%)',
+    cardForeground: 'hsl(210 11% 15%)',
+
     popover: 'hsl(0 0% 100%)',
-    popoverForeground: 'hsl(0 0% 3.9%)',
-    primary: 'hsl(0 0% 9%)',
-    primaryForeground: 'hsl(0 0% 98%)',
-    secondary: 'hsl(0 0% 96.1%)',
-    secondaryForeground: 'hsl(0 0% 9%)',
-    muted: 'hsl(0 0% 96.1%)',
-    mutedForeground: 'hsl(0 0% 45.1%)',
-    accent: 'hsl(0 0% 96.1%)',
-    accentForeground: 'hsl(0 0% 9%)',
-    destructive: 'hsl(0 84.2% 60.2%)',
-    border: 'hsl(0 0% 89.8%)',
-    input: 'hsl(0 0% 89.8%)',
-    ring: 'hsl(0 0% 63%)',
+    popoverForeground: 'hsl(210 11% 15%)',
+
+    /* X Blue */
+    primary: 'hsl(203 89% 53%)',
+    primaryForeground: 'hsl(0 0% 100%)',
+
+    secondary: 'hsl(210 25% 96%)',
+    secondaryForeground: 'hsl(210 11% 20%)',
+
+    muted: 'hsl(210 25% 96%)',
+    mutedForeground: 'hsl(210 10% 50%)',
+
+    accent: 'hsl(203 89% 96%)',
+    accentForeground: 'hsl(210 11% 15%)',
+
+    destructive: 'hsl(355 78% 56%)',
+
+    border: 'hsl(210 20% 90%)',
+    input: 'hsl(210 20% 94%)',
+    ring: 'hsl(203 89% 53%)',
+
     radius: '0.625rem',
-    chart1: 'hsl(12 76% 61%)',
-    chart2: 'hsl(173 58% 39%)',
-    chart3: 'hsl(197 37% 24%)',
-    chart4: 'hsl(43 74% 66%)',
-    chart5: 'hsl(27 87% 67%)',
+
+    chart1: 'hsl(203 89% 53%)',
+    chart2: 'hsl(174 60% 38%)',
+    chart3: 'hsl(210 15% 25%)',
+    chart4: 'hsl(42 90% 58%)',
+    chart5: 'hsl(355 78% 56%)',
   },
+
   dark: {
-    background: 'hsl(0 0% 3.9%)',
-    foreground: 'hsl(0 0% 98%)',
-    card: 'hsl(0 0% 3.9%)',
-    cardForeground: 'hsl(0 0% 98%)',
-    popover: 'hsl(0 0% 3.9%)',
-    popoverForeground: 'hsl(0 0% 98%)',
-    primary: 'hsl(0 0% 98%)',
-    primaryForeground: 'hsl(0 0% 9%)',
-    secondary: 'hsl(0 0% 14.9%)',
-    secondaryForeground: 'hsl(0 0% 98%)',
-    muted: 'hsl(0 0% 14.9%)',
-    mutedForeground: 'hsl(0 0% 63.9%)',
-    accent: 'hsl(0 0% 14.9%)',
-    accentForeground: 'hsl(0 0% 98%)',
-    destructive: 'hsl(0 70.9% 59.4%)',
-    border: 'hsl(0 0% 14.9%)',
-    input: 'hsl(0 0% 14.9%)',
-    ring: 'hsl(300 0% 45%)',
+    background: 'hsl(210 14% 4%)',
+    foreground: 'hsl(210 12% 96%)',
+
+    card: 'hsl(210 14% 6%)',
+    cardForeground: 'hsl(210 12% 96%)',
+
+    popover: 'hsl(210 14% 6%)',
+    popoverForeground: 'hsl(210 12% 96%)',
+
+    /* X Blue (dark) */
+    primary: 'hsl(203 89% 64%)',
+    primaryForeground: 'hsl(210 14% 4%)',
+
+    secondary: 'hsl(210 10% 14%)',
+    secondaryForeground: 'hsl(210 12% 92%)',
+
+    muted: 'hsl(210 10% 14%)',
+    mutedForeground: 'hsl(210 10% 60%)',
+
+    accent: 'hsl(203 50% 14%)',
+    accentForeground: 'hsl(210 12% 96%)',
+
+    destructive: 'hsl(355 85% 60%)',
+
+    border: 'hsl(210 10% 18%)',
+    input: 'hsl(210 10% 16%)',
+    ring: 'hsl(203 89% 64%)',
+
     radius: '0.625rem',
-    chart1: 'hsl(220 70% 50%)',
-    chart2: 'hsl(160 60% 45%)',
-    chart3: 'hsl(30 80% 55%)',
-    chart4: 'hsl(280 65% 60%)',
-    chart5: 'hsl(340 75% 55%)',
+
+    chart1: 'hsl(203 89% 64%)',
+    chart2: 'hsl(170 65% 44%)',
+    chart3: 'hsl(210 10% 70%)',
+    chart4: 'hsl(45 90% 60%)',
+    chart5: 'hsl(355 85% 60%)',
   },
 };
+
  
 export const NAV_THEME = {
   light: {

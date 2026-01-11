@@ -1,12 +1,26 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import LeaveRequestScreen from '../screens/LeaveRequest';
 import OvertimeRequestScreen from '../screens/OvertimeRequest';
+import ShiftAttendanceScreen from '@/screens/ShiftAttendance';
+import UserShiftRequest from '@/screens/UserShiftRequest';
+import { useTheme } from '@/context/ThemeContext';
 
 const Tab = createMaterialTopTabNavigator();
 
 function RequestTopTab({ navigation }) {
+  const { themeColor } = useTheme();
+
   return (
-    <Tab.Navigator initialRouteName="LeaveRequest">
+    <Tab.Navigator
+      initialRouteName="LeaveRequest"
+      screenOptions={{
+        tabBarStyle: { backgroundColor: themeColor.background }, // nền tab bar
+        tabBarActiveTintColor: themeColor.primary, // màu chữ tab active
+        tabBarInactiveTintColor: themeColor.foreground, // màu chữ tab inactive
+        tabBarLabelStyle: { fontWeight: 'bold', fontSize: 14 }, // style chữ
+        tabBarIndicatorStyle: { backgroundColor: themeColor.primary }, // màu gạch chỉ tab active
+      }}
+    >
       <Tab.Screen
         name="LeaveRequest"
         component={LeaveRequestScreen}
@@ -24,6 +38,24 @@ function RequestTopTab({ navigation }) {
           // swipeEnabled: false
         }}
       />
+      <Tab.Screen
+        name="ShiftAttendance"
+        component={ShiftAttendanceScreen}
+        options={{
+          title: 'Chấm công',
+          lazy: true,
+          // swipeEnabled: false
+        }}
+      />
+      {/* <Tab.Screen
+        name="ShiftRequest"
+        component={UserShiftRequest}
+        options={{
+          title: 'Tham gia',
+          lazy: true,
+          // swipeEnabled: false
+        }}
+      /> */}
     </Tab.Navigator>
   );
 }

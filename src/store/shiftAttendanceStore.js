@@ -1,7 +1,6 @@
 import { request } from "@/utils/request";
 import Toast from "react-native-toast-message";
-
-const { create } = require("zustand");
+import { create } from 'zustand'
 
 
 const useShiftAttendanceStore = create((set, get) => ({
@@ -19,7 +18,7 @@ const useShiftAttendanceStore = create((set, get) => ({
             const response = await request(`/shift-attendances${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`)
             const data = response.data;
             const newData = [...data, ...get().shiftAttendances];     
-            set({ shiftAttendances: newData });
+            set({ shiftAttendances: newData, cursorId: response.nextCursorId });
         } catch (error) {
             Toast.show({
                 type: 'error',
@@ -33,11 +32,11 @@ const useShiftAttendanceStore = create((set, get) => ({
         }
     },
     handleRefreshShiftAttendances: async () => {
-        set({ isRefreshing: true });
+        set({ isRefreshing: true, cursorId: null, shiftAttendances: [] });
         try {
             const response = await request('/shift-attendances')
             const data = response.data;
-            set({ shiftAttendances: data, cursorId: null });
+            set({ shiftAttendances: data, cursorId: response.nextCursorId });
         } catch (error) {
             Toast.show({
                 type: 'error',
@@ -50,7 +49,9 @@ const useShiftAttendanceStore = create((set, get) => ({
         }
     },
     init: async () => {
-        get().handleGetShiftAttendancesCursorPagination()
+        set({ isLoading: true});
+        await get().handleRefreshShiftAttendances()
+        set({ isLoading: false});
     }
 }))
 

@@ -1,6 +1,6 @@
-const { request } = require("@/utils/request");
-const { default: Toast } = require("react-native-toast-message");
-const { create } = require("zustand");
+import { request } from '@/utils/request'
+import Toast from 'react-native-toast-message'
+import { create } from 'zustand'
 
 
 
@@ -32,10 +32,10 @@ const useLeaveRequestStore = create((set, get) => ({
     async handleGetLeaveRequestsCursorPagination() {
         try {
             const response = await request(`/leave-requests${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`)
-            const { data, cursorId } = response;
+            const { data, nextCursorId } = response;
             set({
                 leaveRequest: [...get().leaveRequest, ...data],
-                cursorId,
+                cursorId: nextCursorId,
             })
         } catch (error) {
             Toast.show({
@@ -48,10 +48,10 @@ const useLeaveRequestStore = create((set, get) => ({
     async handleRefreshLeaveRequests() {
         try {
             const response = await request('/leave-requests')
-            const { data, cursorId } = response;
+            const { data, nextCursorId } = response;
             set({
                 leaveRequest: data,
-                cursorId,
+                cursorId: nextCursorId,
             })
         } catch (error) {
             Toast.show({

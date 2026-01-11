@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- <script src="https://raw.githubusercontent.com/amvtek/EventSource/refs/heads/master/dist/eventsource.js"></script> -->
+  </head>
+  <body>
+    <img style="width: 500px; height: 500px" />
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/eventsource-polyfill/0.9.6/eventsource.min.js"></script>
+  <script type="module">
+    import QrCode from 'https://danielgjackson.github.io/qrcodejs/qrcode.mjs';
+    // import  'https://cdn.jsdelivr.net/npm/event-source-polyfill@1.0.31/src/eventsource.min.js'
+
+    const response = await fetch(
+      'http://192.168.1.73:3000/api/v1/shifts/qr/019b9254-122c-7380-9b11-31a124656910',
+      {
+        headers: {
+          Authorization:
+            'Bear eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOWI1NGIxLWE5MWYtNzVkOC1iMjQ5LTliODA2ZjIwZWJhMCIsInJvbGUiOjEsImlhdCI6MTc2Njg5ODQyMywiZXhwIjoxNzY5NDkwNDIzfQ.4Mq7U6T1zT55dOAJjFZ6IG9DhpJS0CyYNvnoaCcpQ08',
+        },
+      },
+    );
+    if (!response.ok) {
+      throw new Error('SSE connect failed');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      const events = buffer.split('\n\n');
+      buffer = events.pop(); // giữ phần chưa đủ
+
+      for (const event of events) {
+        const lines = event.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data:')) {
+            const data = line.replace('data:', '').trim();
+            const dataJSON = JSON.parse(data);
+            console.log('Received data:', dataJSON);
+            const matrix = QrCode.generate(dataJSON.data);
+            const uri = QrCode.render('svg-uri', matrix);
+            document.querySelector('img').src = uri;
+          }
+        }
+      }
+    }
+  </script>
+</html>

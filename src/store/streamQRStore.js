@@ -23,7 +23,7 @@ const useStreamQRStore = create((set, get) => ({
 
         set({ isLoading: true });
 
-        const es = new EventSource(`${API_URL}/shifts/attent/${shiftId}`, {
+        const es = new EventSource(`${API_URL}/shifts/qr/${shiftId}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 'content-type': 'application/json',

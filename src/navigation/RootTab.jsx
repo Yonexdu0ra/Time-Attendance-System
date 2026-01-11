@@ -4,17 +4,36 @@ import HomeScreen from '../screens/Home';
 import ProfileScreen from '../screens/Profile';
 import CalendarScreen from '../screens/Calendar';
 import ShiftScreen from '../screens/Shift';
-import { House, Calendar, User, Clock, ListOrdered } from 'lucide-react-native';
+import {
+  House,
+  Calendar,
+  User,
+  Clock,
+  ListOrdered,
+  QrCode,
+  ScanQrCode,
+} from 'lucide-react-native';
 
 import RequestTopTab from './RequestTopTab';
+import ScanQRScreen from '@/screens/ScanQRS';
+import { useTheme } from '@/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function RootTab() {
+  const { themeColor } = useTheme();
   return (
     <Tab.Navigator
       initialRouteName="Home"
       backBehavior="none"
+      screenOptions={{
+        headerStyle: { backgroundColor: themeColor.background },
+        headerTitleStyle: {
+          fontWeight: 'bold',
+          color: themeColor.foreground, 
+        },
+        tabBarStyle: { backgroundColor: themeColor.background },
+      }}
     >
       <Tab.Screen
         name="Home"
@@ -22,22 +41,7 @@ export default function RootTab() {
         options={{
           title: 'Trang chủ',
           headerShown: true,
-          tabBarIcon: ({ color, size }) => (
-            <House color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Shift"
-        component={ShiftScreen}
-        options={{
-          title: 'Ca làm việc',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color, size }) => (
-            <Clock color={color} size={size} />
-          ),
-
+          tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -49,6 +53,18 @@ export default function RootTab() {
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Calendar color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Shift"
+        component={ScanQRScreen}
+        options={{
+          title: 'Chấm công',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => (
+            <ScanQrCode color={color} size={size} />
           ),
         }}
       />
@@ -71,9 +87,7 @@ export default function RootTab() {
           title: 'Hồ sơ',
           headerTitleAlign: 'center',
           headerShown: true,
-          tabBarIcon: ({ color, size }) => (
-            <User color={color} size={size} />
-          ),
+          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
     </Tab.Navigator>

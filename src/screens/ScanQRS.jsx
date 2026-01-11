@@ -1,9 +1,11 @@
+import { Button } from '@/components/ui/button';
 import Corner from '@/components/ui/Coner';
 import { Text } from '@/components/ui/text';
+import useGPSPermisson from '@/hooks/useGPSPermisson';
 import useAttendanceStore from '@/store/useAttendanceStore';
-import { useEffect, useState } from 'react';
+import openAppSettings from '@/utils/openAppSetting';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
-import Toast from 'react-native-toast-message';
 import {
   Camera,
   useCodeScanner,
@@ -13,6 +15,14 @@ import {
 
 function ScanQRScreen({ navigation }) {
   const { hasPermission, requestPermission } = useCameraPermission();
+  const {
+    hasPermission: hasGPSPermission,
+    requestPermission: requestGPSPermission,
+    
+  } = useGPSPermisson();
+  const handleOpenAppSettings = async () => {
+    openAppSettings();
+  };
   const { width } = useWindowDimensions();
   const [scanned, setScanned] = useState(false);
   const handleAttandance = useAttendanceStore(state => state.handleAttandance);
@@ -29,22 +39,22 @@ function ScanQRScreen({ navigation }) {
     codeTypes: ['qr'],
     onCodeScanned: codes => {
       if (!scanned && codes.length > 0) {
-        // Toast.show({
-        //   type: 'success',
-        //   text1: 'Quét mã QR thành công',
-        //   text2: `Giá trị: ${codes[0].value}`,
-        // });
-        handleAttandance(codes[0].value)
+        handleAttandance(codes[0].value);
         setScanned(true);
         navigation.goBack();
       }
     },
   });
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!hasPermission) {
       requestPermission();
     }
-  }, [hasPermission]);
+    console.log(hasGPSPermission);
+    
+    if (!hasGPSPermission) {
+      requestGPSPermission();
+    }
+  }, [hasPermission, hasGPSPermission]);
 
   if (!device) {
     return (
@@ -56,12 +66,28 @@ function ScanQRScreen({ navigation }) {
       </View>
     );
   }
-  if (!hasPermission) {
-    <View>
-      <Text>
-        Không có quyền truy cập camera, vui lòng cấp quyền để tiếp tục.
-      </Text>
-    </View>;
+  if (!hasPermission || !hasGPSPermission) {
+    return (
+      <View>
+        {!hasPermission && (
+          <Text>
+            Ứng dụng không có quyền truy cập camera. Vui lòng cấp quyền trong
+            cài đặt.
+          </Text>
+        )}
+
+        {!hasGPSPermission && (
+          <Text>
+            Ứng dụng không có quyền truy cập vị trí. Vui lòng cấp quyền trong
+            cài đặt.
+          </Text>
+        )}
+
+        <Button variant={'link'} onPress={handleOpenAppSettings}>
+          <Text>Mở cài đặt ngay</Text>
+        </Button>
+      </View>
+    );
   }
   return (
     <>

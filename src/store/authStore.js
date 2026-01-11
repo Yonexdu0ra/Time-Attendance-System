@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { clearRefreshToken } from '../utils/token'
 import Toast from "react-native-toast-message";
-const { request } = require("../utils/request");
+import { request } from "@/utils/request";
+import { storage } from "@/utils/storage";
+import DeviceInfo from "react-native-device-info";
 const useAuthStore = create((set, get) => ({
   /* ===== STATE ===== */
   loading: true,
@@ -43,7 +45,14 @@ const useAuthStore = create((set, get) => ({
   /* ===== LOGOUT ===== */
   logout: async () => {
     try {
-      const logoutData = await request('/auth/logout', { method: 'POST', });
+      storage.remove('accessToken');
+      storage.remove('fcmToken');
+      const logoutData = await request('/auth/logout', { method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',
+          'app-device-id': await DeviceInfo.getUniqueId(),
+        }
+      });
       Toast.show({
         type: 'success',
         text1: 'Thành công',

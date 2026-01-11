@@ -33,7 +33,7 @@ const useShiftStore = create((set, get) => ({
             const newShifts = [...get().shifts, ...shiftData.data];
             set({
                 shifts: newShifts,
-                cursorId: shiftData.data.nextCursorId,
+                cursorId: shiftData.nextCursorId,
                 isLoading: false,
             });
         } catch (error) {
@@ -78,9 +78,9 @@ const useShiftStore = create((set, get) => ({
     handleCancelJoinShift: async (userShiftId, status) => {
         try {
             const shiftStatusData = await request(
-                `/user-shifts/requests/${userShiftId}/status`,
+                `/user-shifts/cancel-request/${userShiftId}`,
                 {
-                    method: 'PUT',
+                    method: 'POST',
                     body: JSON.stringify({
                         status
                     }),
@@ -100,6 +100,29 @@ const useShiftStore = create((set, get) => ({
                 text1: 'Thành công',
                 text2: 'Yêu cầu tham gia ca làm việc đã được hủy',
             });
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+    },
+    handleUpdateShiftStatus: async (shiftId, status) => {
+        try {
+            const shiftStatusData = await request(
+                `/shifts/requests/${shiftId}/status`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ status }),
+                },
+            );
+            // if (shiftStatusData.code !== "SUCCESS") throw new Error(shiftStatusData.message);
+            const newShifts = get().shifts.map(shift => shift.id !== shiftId ? shift : {
+                ...shift,
+                status: shiftStatusData.data.status,
+            });
+            set({ shifts: newShifts});
         } catch (error) {
             Toast.show({
                 type: 'error',

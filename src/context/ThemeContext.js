@@ -1,7 +1,7 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { useColorScheme } from 'nativewind';
 import { THEME } from "../utils/theme";
-import { StatusBar, View } from "react-native";
+import { StatusBar } from "react-native";
 
 
 
@@ -9,7 +9,10 @@ const ThemeContext = createContext({})
 export const useTheme = () => useContext(ThemeContext);
 function ThemeProvider({ children }) {
     const { colorScheme, toggleColorScheme } = useColorScheme();
-    const themeColor = colorScheme === 'dark' ? THEME.dark : THEME.light;
+    // const themeColor = colorScheme === 'dark' ? THEME.dark : THEME.light;
+    const themeColor = useMemo(() => {
+        return colorScheme === 'dark' ? THEME.dark : THEME.light;
+    }, [colorScheme]);
 
 
     return <ThemeContext.Provider value={{ themeColor, toggleColorScheme, theme: colorScheme }}><>
