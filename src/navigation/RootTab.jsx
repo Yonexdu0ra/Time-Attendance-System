@@ -12,11 +12,13 @@ import {
   ListOrdered,
   QrCode,
   ScanQrCode,
+  MapMinus,
 } from 'lucide-react-native';
 
 import RequestTopTab from './RequestTopTab';
 import ScanQRScreen from '@/screens/ScanQRS';
 import { useTheme } from '@/context/ThemeContext';
+import MapScreen from '@/screens/Map';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,7 +26,7 @@ export default function RootTab() {
   const { themeColor } = useTheme();
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Map"
       backBehavior="none"
       screenOptions={{
         headerStyle: { backgroundColor: themeColor.background },
@@ -35,6 +37,15 @@ export default function RootTab() {
         tabBarStyle: { backgroundColor: themeColor.background },
       }}
     >
+      <Tab.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          title: 'Map Screen',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => <MapMinus color={color} size={size} />,
+        }}
+      />
       <Tab.Screen
         name="Home"
         component={HomeScreen}
