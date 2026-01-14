@@ -184,8 +184,8 @@ function CalendarScreen() {
           )}
 
           {shiftAttendances.map((attendance, index) => (
-            <Animated.View
-              entering={FadeInUp.delay(index * 80)}
+            <View
+              
               key={attendance.id}
               className="mb-3 p-4 rounded-2xl bg-card border border-border"
             >
@@ -207,7 +207,7 @@ function CalendarScreen() {
               <Text className="text-sm text-muted-foreground">
                 Trạng thái: {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
               </Text>
-            </Animated.View>
+            </View>
           ))}
         </>
       }

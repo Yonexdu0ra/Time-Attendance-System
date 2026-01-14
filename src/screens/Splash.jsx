@@ -6,7 +6,7 @@ function SplashScreen() {
 
   return (
     <View
-      className="flex-1 justify-center items-center gap-4 text-[28]"
+      className="flex-1 justify-center items-center gap-4 text-[28] bg-background"
       style={{ backgroundColor: themeColor.background }}
     >
       <Text

@@ -9,6 +9,7 @@ const useLeaveRequestStore = create((set, get) => ({
     leaveRequest: [],
     isLoading: true,
     isRefreshing: false,
+    isEnd: false,
     cursorId: null,
     formData: {
         startDate: new Date(),
@@ -30,12 +31,14 @@ const useLeaveRequestStore = create((set, get) => ({
     },
 
     async handleGetLeaveRequestsCursorPagination() {
+        set({ isLoading: true });
         try {
             const response = await request(`/leave-requests${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`)
             const { data, nextCursorId } = response;
             set({
                 leaveRequest: [...get().leaveRequest, ...data],
                 cursorId: nextCursorId,
+                isEnd: !nextCursorId,
             })
         } catch (error) {
             Toast.show({
@@ -43,6 +46,9 @@ const useLeaveRequestStore = create((set, get) => ({
                 text1: 'Lỗi',
                 text2: error.message,
             });
+        }
+        finally {
+            set({ isLoading: false, isRefreshing: false });
         }
     },
     async handleRefreshLeaveRequests() {
@@ -52,6 +58,7 @@ const useLeaveRequestStore = create((set, get) => ({
             set({
                 leaveRequest: data,
                 cursorId: nextCursorId,
+                isEnd: !nextCursorId,
             })
         } catch (error) {
             Toast.show({
@@ -120,6 +127,37 @@ const useLeaveRequestStore = create((set, get) => ({
                 text2: error.message,
             });
         }
+    },
+    async handleCancelLeaveRequest(id) {
+        try {
+            const response = await request(`/leave-requests/${id}/cancel`, {
+                method: 'POST',
+            });
+            if (!response.success) throw new Error('Hủy yêu cầu nghỉ phép thất bại');
+            const newDate = get().leaveRequest.map(item => {
+                if (item.id === id) {
+                    return {
+                        ...item,
+                        status: 'CANCELLED',
+                    }
+                }
+                return item;
+            }
+            );
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: response.message,
+            });
+            set({ leaveRequest: newDate });
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+
     },
     async init() {
         set({ leaveRequest: [], cursorId: null });

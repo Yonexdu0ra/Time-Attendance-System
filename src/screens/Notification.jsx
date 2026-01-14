@@ -1,134 +1,167 @@
-import { memo, useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList, ScrollView, Text, View, Pressable } from 'react-native';
-import { CheckCheck, Bell } from 'lucide-react-native';
+import { memo, useEffect, useMemo, useState } from 'react';
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  View,
+  Pressable,
+} from 'react-native';
+import { Bell, CheckCheck } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import useNotificationStore from '@/store/notificationStore';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/context/ThemeContext';
 
-const listOptions = [
+const FILTERS = [
   { title: 'Tất cả', value: 'all' },
   { title: 'Chưa đọc', value: 'unread' },
-  { title: 'Hệ thống', value: 'system' },
 ];
 
 function NotificationScreen({ navigation }) {
   const { themeColor } = useTheme();
-  const init = useNotificationStore(state => state.init);
-  const isLoading = useNotificationStore(state => state.isLoading);
-  const notifications = useNotificationStore(state => state.notifications);
-  const refreshNotifications = useNotificationStore(
-    state => state.refreshNotifications,
-  );
-  const isRefreshing = useNotificationStore(state => state.isRefreshing);
+  const {
+    notifications,
+    isLoading,
+    isRefreshing,
+    isEnd,
+    refreshNotifications,
+    getNotificationCursorPagination,
+    markAllAsRead,
+    markAsRead,
+  } = useNotificationStore();
+
   const [filter, setFilter] = useState('all');
-  const markAllAsRead = useNotificationStore(state => state.markAllAsRead);
-  const markAsRead = useNotificationStore(state => state.markAsRead);
+
+  const filteredData = useMemo(() => {
+    if (filter === 'unread') {
+      return notifications.filter(n => !n.isRead);
+    }
+    return notifications;
+  }, [filter, notifications]);
 
   const HeaderRight = memo(() => (
     <Button
       variant="ghost"
-      className="mr-4 flex-row items-center"
+      className="mr-3 flex-row items-center"
       onPress={markAllAsRead}
     >
       <CheckCheck size={18} color={themeColor.primary} />
-      <Text className="text-primary font-semibold">Đã đọc tất cả</Text>
+      <Text className="ml-1 text-primary font-medium">
+        Đọc tất cả
+      </Text>
     </Button>
   ));
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      init();
-    }, 150); // đợi animation xong
-
-    return () => clearTimeout(t);
-  }, []);
   useEffect(() => {
     navigation.setOptions({
       title: 'Thông báo',
       headerShown: true,
       headerRight: () => <HeaderRight />,
     });
-  }, [navigation]);
+  }, []);
 
   return (
     <View className="flex-1 bg-background">
-      {/* FILTER */}
-      <View className="px-3 py-2">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {listOptions.map(option => {
-            const active = filter === option.value;
+      {/* SEGMENTED FILTER */}
+      <View className="px-4 pt-3 pb-2">
+        <View className="flex-row bg-muted rounded-full p-1">
+          {FILTERS.map(opt => {
+            const active = filter === opt.value;
             return (
               <Pressable
-                key={option.value}
-                onPress={() => setFilter(option.value)}
-                className={`mr-2 px-4 py-2 rounded-full ${
-                  active ? 'bg-primary' : 'bg-muted'
+                key={opt.value}
+                onPress={() => setFilter(opt.value)}
+                className={`flex-1 py-2 rounded-full ${
+                  active ? 'bg-primary' : ''
                 }`}
               >
                 <Text
-                  className={`font-medium ${
-                    active ? 'text-white' : 'text-foreground'
+                  className={`text-center font-medium ${
+                    active ? 'text-white' : 'text-muted-foreground'
                   }`}
                 >
-                  {option.title}
+                  {opt.title}
                 </Text>
               </Pressable>
             );
           })}
-        </ScrollView>
+        </View>
       </View>
 
       {/* LIST */}
       <FlatList
-        data={notifications}
+        data={filteredData}
         keyExtractor={item => item.id.toString()}
-        refreshing={isLoading}
+        refreshing={isRefreshing}
         onRefresh={refreshNotifications}
-        contentContainerStyle={{ paddingBottom: 24 }}
-        renderItem={({ item, index }) => (
-          <Animated.View entering={FadeInDown.delay(index * 100)}>
+        contentContainerStyle={{ paddingBottom: 32 }}
+        onEndReached={() =>
+          !isLoading && !isEnd && getNotificationCursorPagination()
+        }
+        
+        renderItem={({ item }) => {
+          const unread = !item.isRead;
+
+          return (
             <Pressable
-              className={`mx-3 mb-3 p-4 rounded-2xl flex-row items-start ${
-                item.isRead ? 'bg-card' : 'bg-primary/10'
+              onPress={() => unread && markAsRead(item.id)}
+              className={`mx-4 mb-3 rounded-2xl p-4 flex-row ${
+                unread ? 'bg-primary/10 border-l-4 border-primary' : 'bg-card'
               }`}
-              onPress={() => markAsRead(item.id)}
             >
               {/* ICON */}
-              <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center mr-3">
-                <Bell size={18} className="text-primary" />
+              <View
+                className={`w-9 h-9 rounded-full items-center justify-center mr-3 ${
+                  unread ? 'bg-primary/20' : 'bg-muted'
+                }`}
+              >
+                <Bell
+                  size={16}
+                  color={unread ? themeColor.primary : themeColor.mutedForeground}
+                />
               </View>
 
               {/* CONTENT */}
               <View className="flex-1">
-                <Text className="font-semibold text-base mb-1 text-primary">
-                  {item.title}
-                </Text>
-                <Text className="text-sm text-muted-foreground">
+                <View className="flex-row justify-between items-start mb-1">
+                  <Text
+                    className={`font-semibold ${
+                      unread ? 'text-primary' : 'text-foreground'
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text className="text-xs text-muted-foreground ml-2">
+                    {new Date(item.createdAt).toLocaleTimeString('vi-VN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      
+                    })}
+                  </Text>
+                </View>
+
+                <Text
+                  className="text-sm text-muted-foreground"
+                  numberOfLines={2}
+                >
                   {item.message}
                 </Text>
               </View>
-
-              {/* UNREAD DOT */}
-              {!item.isRead && (
-                <View className="w-3 h-3 bg-destructive rounded-full ml-2 mt-1" />
-              )}
             </Pressable>
-          </Animated.View>
-        )}
+          );
+        }}
         ListEmptyComponent={
-          !isLoading &&
-          !isRefreshing && (
-            <View className="items-center mt-20">
-              <Bell size={40} className="text-muted-foreground mb-3" />
-              <Text className="text-muted-foreground text-center">
-                Không có thông báo nào
+          !isLoading && (
+            <View className="flex-1 items-center justify-center mt-32">
+              <Bell size={48} className="text-muted-foreground mb-4" />
+              <Text className="text-muted-foreground">
+                Không có thông báo
               </Text>
             </View>
           )
         }
         ListFooterComponent={
-          (isLoading || isRefreshing) && (
+          isLoading && (
             <Text className="text-center py-4 text-muted-foreground">
               Đang tải...
             </Text>

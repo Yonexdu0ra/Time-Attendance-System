@@ -4,6 +4,7 @@ import messaging from '@react-native-firebase/messaging';
 import { storage } from '@/utils/storage';
 import useNotificationStore from '@/store/notificationStore';
 import notifee, { AndroidImportance } from '@notifee/react-native'
+import useAuthStore from '@/store/authStore';
 const NotificationContext = createContext(null);
 export const useNotification = () => useContext(NotificationContext);
 
@@ -35,6 +36,7 @@ const NotificationProvider = ({ children }) => {
     const [hasNotificationPermission, setHasNotificationPermission] = useState(false);
     const addNotification = useNotificationStore(state => state.addNotification);
     const registerDeviceToken = useNotificationStore(state => state.registerDeviceToken);
+    const user = useAuthStore(state => state.user);
     const registerDeviceIfNeeded = async () => {
         const token = await messaging().getToken();
         const savedToken = storage.getString(FCM_TOKEN_KEY);
@@ -87,7 +89,7 @@ const NotificationProvider = ({ children }) => {
         });
 
         const unsubscribeMessage = messaging().onMessage(async remoteMessage => {
-            console.log(remoteMessage);
+            // console.log(remoteMessage);
             
             await notifee.displayNotification({
                 title: remoteMessage.notification?.title,
@@ -115,7 +117,7 @@ const NotificationProvider = ({ children }) => {
             unsubscribeMessage();
             unsubscribeRefreshToken();
         };
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         async function checkPermission() {

@@ -90,6 +90,37 @@ const useOvertimeRequestStore = create((set, get) => ({
             });
         }
     },
+    handleCancelOvertimeRequest: async (id) => {
+        try {
+            const response = await request(`/overtime-requests/${id}/cancel`, {
+                method: 'POST',
+            });
+            if (!response.success) throw new Error('Hủy yêu cầu làm thêm giờ thất bại');
+            const newDate = get().overtimeRequest.map(item => {
+                if (item.id === id) {
+                    return {
+                        ...item,
+                        status: response.data.status,
+                    }
+                }
+                return item;
+            }
+            );
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: response.message,
+            });
+            set({ overtimeRequest: newDate });
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+        }
+
+    },
     init: async () => {
         set({ isLoading: true, cursorId: null });
         await get().handleGetOvertimeRequestCursorPagination();

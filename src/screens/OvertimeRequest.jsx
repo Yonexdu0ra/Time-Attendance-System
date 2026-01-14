@@ -10,7 +10,7 @@ import { View, FlatList } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
-const OvertimeRequestItem = ({ item, index, config, user, onUpdate }) => {
+const OvertimeRequestItem = ({ item, index, config, user, onUpdate, onCancel }) => {
   const { STATUS_TYPE_STRING, STATUS_TYPE, ROLE } = config;
 
   // Badge class theo trạng thái
@@ -65,7 +65,7 @@ const OvertimeRequestItem = ({ item, index, config, user, onUpdate }) => {
             <Button
               variant="ghost"
               className="flex-1 h-11 rounded-lg"
-              onPress={() => onUpdate(item.id, STATUS_TYPE.CANCELLED)}
+              onPress={() => onCancel(item.id)}
             >
               <Text className="text-destructive text-center">Hủy yêu cầu</Text>
             </Button>
@@ -100,7 +100,7 @@ function OvertimeRequestScreen({ navigation }) {
   const overtimeRequest = useOvertimeRequestStore(state => state.overtimeRequest);
   const handleUpdateOvertimeRequestStatus = useOvertimeRequestStore(state => state.handleUpdateOvertimeRequestStatus);
   const handleRefreshOvertimeRequests = useOvertimeRequestStore(state => state.handleRefreshOvertimeRequests);
-
+  const handleCancelOvertimeRequest = useOvertimeRequestStore(state => state.handleCancelOvertimeRequest);
   const user = useAuthStore(state => state.user);
   const config = useAuthStore(state => state.config);
 
@@ -123,6 +123,7 @@ function OvertimeRequestScreen({ navigation }) {
             config={config}
             user={user}
             onUpdate={handleUpdateOvertimeRequestStatus}
+            onCancel={handleCancelOvertimeRequest}
           />
         )}
         ListEmptyComponent={

@@ -41,7 +41,8 @@ function ScanQRScreen({ navigation }) {
       if (!scanned && codes.length > 0) {
         handleAttandance(codes[0].value);
         setScanned(true);
-        navigation.goBack();
+        navigation.navigate('Home');
+        setScanned(false);
       }
     },
   });
@@ -68,7 +69,7 @@ function ScanQRScreen({ navigation }) {
   }
   if (!hasPermission || !hasGPSPermission) {
     return (
-      <View>
+      <View className="flex-1 justify-center items-center p-4 bg-background gap-4">
         {!hasPermission && (
           <Text>
             Ứng dụng không có quyền truy cập camera. Vui lòng cấp quyền trong
@@ -91,7 +92,7 @@ function ScanQRScreen({ navigation }) {
   }
   return (
     <>
-      <View className="flex-1 relative">
+      <View className="flex-1 relative bg-background">
         <Camera
           style={{ flex: 1 }}
           codeScanner={codeScanner}

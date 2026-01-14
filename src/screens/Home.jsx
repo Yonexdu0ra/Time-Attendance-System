@@ -1,7 +1,8 @@
-import { Bell, ScanQrCode } from 'lucide-react-native';
+import {  ScanQrCode } from 'lucide-react-native';
 // import { useLayoutEffect } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -18,12 +19,19 @@ import { Badge } from '@/components/ui/badge';
 import useNotificationStore from '@/store/notificationStore';
 import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import useAuthStore from '@/store/authStore';
+import useShiftStore from '@/store/shiftStore';
+import { Bell } from '@/components/ui/bell';
 function HomeScreen({ navigation }) {
   const { themeColor } = useTheme();
   const user = useAuthStore(state => state.user);
+  const shifts = useShiftStore(state => state.shifts);
+  const initShifts = useShiftStore(state => state.init);
   const { hasPermission, requestPermission } = useCameraPermission();
   const unReadCount = useNotificationStore(state => state.unReadCount);
-
+  const MAPTILER_KEY = 'tZPHtBJcn74rutLOqByE';
+  useEffect(() => {
+    initShifts();
+  }, []);
   useEffect(() => {
     const fetchCameraPermission = async () => {
       // console.log(hasPermission);
@@ -39,25 +47,11 @@ function HomeScreen({ navigation }) {
     navigation.setOptions({
       headerTitle: '',
       headerRight: () => (
-        <TouchableOpacity
-          className="mr-4"
-          onPress={() => navigation?.getParent()?.push('Notification')}
-        >
-          <Animated.View className="relative" entering={FadeInRight.delay(500)}>
-            <Bell size={24} color={themeColor.foreground} />
-            {unReadCount > 0 && (
-              <Badge
-                variant={'destructive'}
-                className={'absolute -right-3 -top-3'}
-              >
-                <Text>{unReadCount}</Text>
-              </Badge>
-            )}
-          </Animated.View>
-        </TouchableOpacity>
+        <Bell/>
       ),
       headerLeft: () => (
-        <TouchableOpacity
+        <Animated.View entering={FadeInLeft.delay(500)}>
+          <TouchableOpacity
           className="ml-4"
           onPress={() => navigation?.navigate('Profile')}
         >
@@ -71,28 +65,22 @@ function HomeScreen({ navigation }) {
             <Text className={'font-bold'}>{user.fullName}</Text>
           </View>
         </TouchableOpacity>
+        </Animated.View>
       ),
     });
   }, [navigation, themeColor, unReadCount]);
 
-  return <View className="flex-1 bg-background">
-    <ScrollView
-      contentContainerStyle={{ padding: 16 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text className="text-sm font-bold">Thống kê công việc trong tháng</Text>
-      <View className='flex flex-row gap-4'>
-        <View className='border p-4 rounded-lg bg-secondary'> 
-          <Text>Tổng giờ làm</Text>
-          <Text>142.5 giờ</Text>
-        </View>
-        <View className='border p-4 rounded-lg bg-secondary'>
-          <Text>Ngày công</Text>
-          <Text>18/22 ngày</Text>
-        </View>
-      </View>
-    </ScrollView>
-  </View>;
+  return (
+    <View className="flex-1 bg-background">
+      <FlatList data={shifts}
+       keyExtractor={item => item.id}
+       horizontal
+       renderItem={({item}) => <View  className='bg-secondary  w-full'>
+        <Text>{item.name}</Text>
+       </View>}
+       />
+    </View>
+  );
 }
 
 export default HomeScreen;

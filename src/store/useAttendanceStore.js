@@ -9,9 +9,9 @@ import { create } from 'zustand'
 const useAttendanceStore = create((set, get) => ({
     handleAttandance: async (qrData) => {
         try {
-            const response = await request('/shift-attendances/attendance', {
+            const response = await request('/shift-attendances/', {
                 method: 'POST',
-                body: JSON.stringify({ data: qrData })
+                body: JSON.stringify({ data: qrData, longitude: 10, latitude: 10 }),
             })
             console.log(response);
 

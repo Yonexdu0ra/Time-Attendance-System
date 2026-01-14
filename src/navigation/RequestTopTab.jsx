@@ -4,12 +4,13 @@ import OvertimeRequestScreen from '../screens/OvertimeRequest';
 import ShiftAttendanceScreen from '@/screens/ShiftAttendance';
 import UserShiftRequest from '@/screens/UserShiftRequest';
 import { useTheme } from '@/context/ThemeContext';
+import useAuthStore from '@/store/authStore';
 
 const Tab = createMaterialTopTabNavigator();
 
 function RequestTopTab({ navigation }) {
   const { themeColor } = useTheme();
-
+  const user = useAuthStore(state => state.user);
   return (
     <Tab.Navigator
       initialRouteName="LeaveRequest"
@@ -38,24 +39,17 @@ function RequestTopTab({ navigation }) {
           // swipeEnabled: false
         }}
       />
-      <Tab.Screen
-        name="ShiftAttendance"
-        component={ShiftAttendanceScreen}
-        options={{
-          title: 'Chấm công',
-          lazy: true,
-          // swipeEnabled: false
-        }}
-      />
-      {/* <Tab.Screen
-        name="ShiftRequest"
-        component={UserShiftRequest}
-        options={{
-          title: 'Tham gia',
-          lazy: true,
-          // swipeEnabled: false
-        }}
-      /> */}
+      {user.role >= 1 && (
+        <Tab.Screen
+          name="ShiftAttendance"
+          component={ShiftAttendanceScreen}
+          options={{
+            title: 'Chấm công',
+            lazy: true,
+            // swipeEnabled: false
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 }

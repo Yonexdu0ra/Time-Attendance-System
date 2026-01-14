@@ -11,6 +11,7 @@ const useNotificationStore = create((set, get) => ({
     cursorId: null,
     isLoading: false,
     isRefreshing: false,
+    isEnd: false,
     unReadCount: 0,
     setIsLoading: (isLoading) => set({ isLoading }),
     setIsRefreshing: (isRefreshing) => set({ isRefreshing }),
@@ -53,11 +54,14 @@ const useNotificationStore = create((set, get) => ({
         try {
             set({ isLoading: true });
             const response = await request(`/notifications` + (get().cursorId ? `?cursorId=${get().cursorId}` : ''));
-            const newNotifications = response.data || [];
+            const newNotifications = [...get().notifications, ...response.data]
+            const totalUnread = newNotifications.filter(n => !n.isRead).length;
             set((state) => ({
-                notifications: [...state.notifications, ...newNotifications],
+                notifications:newNotifications,
                 cursorId: response.nextCursorId || null,
                 isLoading: false,
+                isEnd: response.nextCursorId ? false : true,
+                unReadCount: totalUnread,
             }));
         } catch (error) {
             Toast.show({
@@ -72,11 +76,13 @@ const useNotificationStore = create((set, get) => ({
         try {
             set({ isRefreshing: true, cursorId: null, notifications: [] });
             const response = await request(`/notifications`);
-            const newNotifications = response.data || [];
+            const newNotifications = response.data
+            const totalUnread = newNotifications.filter(n => !n.isRead).length;
             set({
                 notifications: newNotifications,
                 cursorId: response.nextCursorId || null,
                 isRefreshing: false,
+                unReadCount: totalUnread,
             });
         } catch (error) {
             Toast.show({

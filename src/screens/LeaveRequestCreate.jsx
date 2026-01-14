@@ -72,7 +72,7 @@ function LeaveRequestScreen({ navigation }) {
 
   return (
     <View className="flex-1 p-4 bg-background">
-      <ScrollView className="bg-secondary">
+      <ScrollView className="">
         {/* START DATE PICKER */}
         {show.startDate && (
           <DateTimePicker
@@ -130,7 +130,7 @@ function LeaveRequestScreen({ navigation }) {
           </View>
 
           {/* INFO */}
-          <View className="p-4 rounded-lg bg-blue-200">
+          <View className="p-4 rounded-lg bg-secondary flex flex-row justify-between items-center">
             <Text variant="muted">Tổng số ngày nghỉ tối đa</Text>
             <Text className="text-blue-500">3 ngày</Text>
           </View>
@@ -142,6 +142,7 @@ function LeaveRequestScreen({ navigation }) {
               selectedValue={formData.leaveType}
               onValueChange={handleChangeLeaveType}
             >
+              <Picker.Item label="Chọn loại nghỉ phép" value="" enabled={false} />
               {Object.entries(LEAVE_TYPE).map(([key, value]) => (
                 <Picker.Item
                   key={key}

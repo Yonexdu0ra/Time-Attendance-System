@@ -28,15 +28,15 @@ const useShiftStore = create((set, get) => ({
     handleGetListShiftByCursorPagination: async () => {
         set({ isLoading: true });
         try {
-            const shiftData = await request(`/shifts${get().cursorId ? `?cursorId=${get().cursorId}` : ''}`);
+            const shiftData = await request(`/shifts/joined`);
             // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
             const newShifts = [...get().shifts, ...shiftData.data];
             set({
                 shifts: newShifts,
-                cursorId: shiftData.nextCursorId,
                 isLoading: false,
             });
         } catch (error) {
+            set({ isLoading: false });
             Toast.show({
                 type: 'error',
                 text1: 'Lỗi',

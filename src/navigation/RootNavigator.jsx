@@ -91,7 +91,7 @@ function ManagerStack() {
         tabBarStyle: { backgroundColor: themeColor.background },
         gestureEnabled: true,
         fullScreenGestureEnabled: true,
-        gestureResponseDistance: 200,
+        gestureResponseDistance: 50,
         detachPreviousScreen: true,
 
       }}
