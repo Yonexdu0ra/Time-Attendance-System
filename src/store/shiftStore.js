@@ -134,7 +134,7 @@ const useShiftStore = create((set, get) => ({
     handleRefreshShifts: async () => {
         set({ isRefreshing: true, cursorId: null });
         try {
-            const shiftData = await request(`/shifts`);
+            const shiftData = await request(`/shifts/joined`);
             // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
             set({
                 shifts: shiftData.data,
@@ -151,7 +151,7 @@ const useShiftStore = create((set, get) => ({
         }
     },
     init: () => {
-        get().handleGetListShiftByCursorPagination();
+        get().handleRefreshShifts();
     },
 }));
 
