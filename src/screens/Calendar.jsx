@@ -5,7 +5,7 @@ import useAuthStore from '@/store/authStore';
 import useHolidayStore from '@/store/holidayStore';
 import useShiftAttendanceStore from '@/store/shiftAttendanceStore';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
@@ -29,7 +29,7 @@ LocaleConfig.locales['vi'] = {
 };
 LocaleConfig.defaultLocale = 'vi';
 
-function CalendarScreen() {
+function CalendarScreen({ navigation }) {
   const [selected, setSelected] = useState(
     new Date().toISOString().split('T')[0],
   );
@@ -184,17 +184,19 @@ function CalendarScreen() {
           )}
 
           {shiftAttendances.map((attendance, index) => (
-            <View
-              
+            <TouchableOpacity
               key={attendance.id}
               className="mb-3 p-4 rounded-2xl bg-card border border-border"
+              onPress={() => {
+                navigation.push('AttendanceDetail', { attendance });
+              }}
             >
               <View className="flex-row justify-between items-center mb-2">
                 <Text className="font-semibold text-base">
                   {attendance.shift.name}
                 </Text>
                 <Badge variant="outline">
-                  <Text>{SHIFT_TYPE_STRING[attendance.shift.type]}</Text>
+                   <Text>Ca {SHIFT_TYPE_STRING[attendance.shift.type]}</Text>
                 </Badge>
               </View>
 
@@ -207,7 +209,7 @@ function CalendarScreen() {
               <Text className="text-sm text-muted-foreground">
                 Trạng thái: {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
               </Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </>
       }

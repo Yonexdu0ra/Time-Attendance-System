@@ -14,6 +14,7 @@ import StreamQRScreen from '@/screens/StreamQR';
 import LeaveRequestCreate from '@/screens/LeaveRequestCreate';
 import OvertimeRequestCreate from '@/screens/OvertimeRequestCreate';
 import QrCodeProfileScreen from '@/screens/QrCodeProfile';
+import AttendanceDetailScreen from '@/screens/AttendanceDetail';
 import SettingScreen from '@/screens/Settings';
 import { useTheme } from '@/context/ThemeContext';
 const Stack = createStackNavigator();
@@ -71,6 +72,8 @@ function UserStack() {
       />
       <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
       <Stack.Screen name="Settings" component={SettingScreen} />
+      <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
+
     </Stack.Navigator>
   );
 }
@@ -108,6 +111,7 @@ function ManagerStack() {
       />
       <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
       <Stack.Screen name="Settings" component={SettingScreen} />
+      <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
     </Stack.Navigator>
   );
 }

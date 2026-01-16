@@ -1,7 +1,7 @@
-import { FlatList, View } from 'react-native';
+import { ActivityIndicator, FlatList, ScrollView, View } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useCameraPermission } from 'react-native-vision-camera';
 import { Text } from '@/components/ui/text';
@@ -23,9 +23,9 @@ function HomeScreen({ navigation }) {
   const { themeColor } = useTheme();
   const user = useAuthStore(state => state.user);
   const shifts = useShiftStore(state => state.shifts);
-  const positon = useCurrentPosition();
-  const { SHIFT_TYPE, SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
-  console.log(positon);
+  const position = useCurrentPosition();
+  const { SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
+  const notification = useNotificationStore(state => state.notifications);
 
   const initShifts = useShiftStore(state => state.init);
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -55,57 +55,130 @@ function HomeScreen({ navigation }) {
 
   return (
     <View className="flex-1 bg-background">
-      <FlatList
-        data={shifts}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{ padding: 16 }}
-        ListFooterComponent={
-          positon && positon.coords ? (
-            <View className=" justify-center items-center gap-4 mt-4">
-              <Text>Kinh độ: {positon.coords.longitude}</Text>
-              <Text>Vĩ độ: {positon.coords.latitude}</Text>
-              <Text>Độ chính xác: {positon.coords.accuracy}m</Text>
-            </View>
-          ) : null
-        }
-        renderItem={({ item, index }) => (
-          <View className="bg-secondary relative rounded-lg">
-            <MapView
-              style={{ height: 200, width: '100%', borderRadius: 12 }} // Ưu tiên dùng style inline cho MapView để đảm bảo kích thước
-              mapStyle={MAP_URL}
+      <ScrollView>
+        <View className="p-4">
+          <Text className={'text-lg'}>Ca làm việc hiện tại</Text>
+          {shifts?.map(item => (
+            <View
+              className="bg-secondary relative rounded-lg overflow-hidden"
+              key={item.id}
             >
-              {positon && positon.coords && (
+              {position ? (
                 <>
-                  <NativeUserLocation />
-                  <Camera
-                    center={[positon.coords.longitude, positon.coords.latitude]}
-                    duration={2000}
-                    easing="fly"
-                    zoom={14}
-                  />
+                  <MapView
+                    style={{ height: 200, width: '100%', borderRadius: 12 }} // Ưu tiên dùng style inline cho MapView để đảm bảo kích thước
+                    mapStyle={MAP_URL}
+                  >
+                    <>
+                      <NativeUserLocation />
+                      <Camera
+                        center={[
+                          position.coords.longitude,
+                          position.coords.latitude,
+                        ]}
+                        duration={2000}
+                        easing="fly"
+                        zoom={14}
+                      />
+                    </>
+                  </MapView>
                 </>
+              ) : (
+                <View className="justify-center items-center gap-4 flex-row" style={{ height: 200 }}>
+                  <Text>Loading GPS...</Text>
+                  <ActivityIndicator />
+                </View>
               )}
-            </MapView>
-            <View className="p-4 gap-2">
-              <Text className="font-bold text-lg text-center text-primary">
-                {item.name}
+              <View className="p-4 gap-2">
+                <Text className="font-bold text-lg text-center text-primary">
+                  {item.name}
+                </Text>
+                <Text className={''}>
+                  Ca {SHIFT_TYPE_STRING[item.type]}:{' '}
+                  {new Date(item.workStart).toTimeString().split(' ')[0]} -{' '}
+                  {new Date(item.workEnd).toTimeString().split(' ')[0]}
+                </Text>
+                <Text className="text-muted-foreground">
+                  {item.address || 'Không xác định'}
+                </Text>
+                <Text className={'text-green-500'}>
+                  Bạn đang trong khu vực làm việc
+                </Text>
+                <Button className="w-full mt-2 justify-center">
+                  <ScanQrCode color={themeColor.background} />
+                  <Text className="font-bold">Chấm công ngay</Text>
+                </Button>
+                <Text className={'text-sm text-destructive'}>
+                  Hiện tại không ở trong bán kính cho phép chấm công
+                </Text>
+              </View>
+            </View>
+          ))}
+          {position ? (
+            <View className="justify-center items-center gap-4 mt-4">
+              <Text className={'text-sm text-muted-foreground'}>
+                Vị trí hiện tại: {position.coords.latitude},{' '}
+                {position.coords.longitude}
               </Text>
-              <Text className={''}>
-                Ca {SHIFT_TYPE_STRING[item.type]}:{' '}
-                {new Date(item.workStart).toTimeString().split(' ')[0]} -{' '}
-                {new Date(item.workEnd).toTimeString().split(' ')[0]}
+              <Text className={'text-sm text-primary'}>
+                Độ chính xác: +/- {position.coords.accuracy}m
               </Text>
-              <Text className="text-muted-foreground">
-                {item.address || 'Không xác định'}
+            </View>
+          ) : null}
+        </View>
+        <View className="p-4">
+          <Text>Tóm tắt công việc tháng {new Date().getMonth() + 1}</Text>
+          {/* view hàng ngang */}
+          <View className="flex-row justify-between gap-2">
+            <View className="bg-secondary p-4 rounded-lg w-1/2 items-center flex-col">
+              <Text className={'text-sm text-muted-foreground'}>
+                Tổng giờ làm
               </Text>
-              <Button>
-                <ScanQrCode color={themeColor.background} />
-                <Text className='font-bold'>Chấm công ngay</Text>
-              </Button>
+              <View className="flex-row gap-1">
+                <Text>142.5</Text>
+                <Text className={'text-muted-foreground text-sm self-end'}>
+                  giờ
+                </Text>
+              </View>
+            </View>
+            <View className="bg-secondary p-4 rounded-lg w-1/2 items-center flex-col">
+              <Text className={'text-sm text-muted-foreground'}>Ngày công</Text>
+              <View className="flex-row gap-1">
+                <Text>18/22</Text>
+                <Text className={'text-muted-foreground text-sm self-end'}>
+                  ngày
+                </Text>
+              </View>
             </View>
           </View>
-        )}
-      />
+        </View>
+        <View className="p-4">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text>Thông báo mới nhất</Text>
+            <Button
+              variant={'link'}
+              onPress={() => {
+                navigation.navigate('Notification');
+              }}
+            >
+              <Text>Xem tất cả</Text>
+            </Button>
+          </View>
+        </View>
+        {notification?.map(item => (
+          <View
+            className={`${
+              item.read ? 'bg-secondary' : 'bg-accent'
+            } rounded-lg p-4 mb-2`}
+            key={item.id}
+          >
+            <Text className="font-bold">{item.title}</Text>
+            <Text className="text-sm text-muted-foreground">
+              {item.message}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
