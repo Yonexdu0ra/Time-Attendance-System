@@ -11,6 +11,7 @@ import DeviceInfo from 'react-native-device-info';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { storage } from '@/utils/storage';
 export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState({
     identifier: '',
@@ -45,6 +46,7 @@ export default function LoginScreen({ navigation }) {
         }),
       });
       accessTokenStore.getState().setAccessToken(data.data.accessToken);
+      storage.set('accessToken', data.data.accessToken);
       useAuthStore.setState({ user: data.data.user });
       const configData = await request('/config')
       useAuthStore.setState({ config: configData.data });

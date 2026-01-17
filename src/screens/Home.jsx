@@ -10,26 +10,44 @@ import useAuthStore from '@/store/authStore';
 import useShiftStore from '@/store/shiftStore';
 import { Bell } from '@/components/ui/bell';
 import {
+  Callout,
   Camera,
+  FillLayer,
+  LineLayer,
   MapView,
+  MarkerView,
   NativeUserLocation,
+  PointAnnotation,
+  ShapeSource,
   useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
 import HeaderLeft from '@/components/ui/headerRight';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScanQrCode } from 'lucide-react-native';
+import { CircleUserRound, ScanQrCode } from 'lucide-react-native';
+import createCircle from '@/utils/createCircle';
 function HomeScreen({ navigation }) {
   const { themeColor } = useTheme();
   const user = useAuthStore(state => state.user);
   const shifts = useShiftStore(state => state.shifts);
   const position = useCurrentPosition();
+  console.log(position);
+
   const { SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
   const notification = useNotificationStore(state => state.notifications);
 
   const initShifts = useShiftStore(state => state.init);
   const { hasPermission, requestPermission } = useCameraPermission();
   const unReadCount = useNotificationStore(state => state.unReadCount);
+  const companyGPS = {
+    longitude: 105.8007881,
+    accuracy: 100,
+    altitude: 6.900000095367432,
+    altitudeAccuracy: 100,
+    latitude: 21.5853451,
+    heading: null,
+    speed: null,
+  };
   const MAPTILER_KEY = 'tZPHtBJcn74rutLOqByE';
   const MAP_URL =
     'https://api.maptiler.com/maps/base-v4/style.json?key=tZPHtBJcn74rutLOqByE';
@@ -63,27 +81,58 @@ function HomeScreen({ navigation }) {
               className="bg-secondary relative rounded-lg overflow-hidden"
               key={item.id}
             >
-              {position ? (
-                <>
-                  <MapView
-                    style={{ height: 200, width: '100%', borderRadius: 12 }} // Ưu tiên dùng style inline cho MapView để đảm bảo kích thước
-                    mapStyle={MAP_URL}
+              {position && (
+                <MapView
+                  style={{ height: 200, width: '100%', borderRadius: 12 }} // Ưu tiên dùng style inline cho MapView để đảm bảo kích thước
+                  mapStyle={MAP_URL}
+                >
+                  <Camera
+                    center={[
+                      parseFloat(item.longitude),
+                      parseFloat(item.latitude),
+                    ]}
+                    duration={2000}
+                    easing="fly"
+                    zoom={16}
+                  />
+                  <NativeUserLocation />
+                  <PointAnnotation
+                    id="address"
+                    coordinate={[
+                      parseFloat(item.longitude),
+                      parseFloat(item.latitude),
+                    ]}
+                    anchor={{
+                      x: 0.5,
+                      y: 1.5,
+                    }}
                   >
-                    <>
-                      <NativeUserLocation />
-                      <Camera
-                        center={[
-                          position.coords.longitude,
-                          position.coords.latitude,
-                        ]}
-                        duration={2000}
-                        easing="fly"
-                        zoom={14}
-                      />
-                    </>
-                  </MapView>
-                </>
-              ) : (
+                    <Callout id="callout_id" title="Tuyến Công CB"></Callout>
+                  </PointAnnotation>
+                  <ShapeSource
+                    id="company-radius"
+                    data={createCircle(
+                      [parseFloat(item.longitude), parseFloat(item.latitude)],
+                      item.radius,
+                    )}
+                  >
+                    <FillLayer
+                      id="radius-fill"
+                      style={{
+                        fillColor: 'rgba(0, 122, 255, 0.2)',
+                      }}
+                    ></FillLayer>
+                    <LineLayer
+                      id="radius-line"
+                      style={{
+                        lineColor: 'rgba(0, 122, 255, 0.8)',
+                        lineWidth: 2,
+                      }}
+                    ></LineLayer>
+                  </ShapeSource>
+                </MapView>
+              )}
+              {!position && (
                 <View
                   className="justify-center items-center gap-4 flex-row"
                   style={{ height: 200 }}

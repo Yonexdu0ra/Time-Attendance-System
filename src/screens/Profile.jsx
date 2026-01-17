@@ -43,7 +43,7 @@ function ProfileScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <Image
-          source={{ uri: 'https://github.com/shadcn.png' }}
+          source={{ uri: user.avatarUrl }}
           className="w-24 h-24 rounded-full self-center mb-4"
         />
 

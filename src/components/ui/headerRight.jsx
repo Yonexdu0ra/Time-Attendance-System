@@ -16,7 +16,7 @@ function HeaderLeft() {
         <View className="flex-row items-center gap-2">
           <Image
             source={{
-              uri: 'https://github.com/shadcn.png',
+              uri: user.avatarUrl,
             }}
             className="w-10 h-10 rounded-full "
           />

@@ -2,15 +2,23 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useTheme } from '@/context/ThemeContext';
 import useAuthStore from '@/store/authStore';
+import createCircle from '@/utils/createCircle';
 import {
+  Callout,
   Camera,
+  FillLayer,
+  LineLayer,
   MapView,
+  MarkerView,
   NativeUserLocation,
+  PointAnnotation,
+  ShapeSource,
   useCurrentPosition,
 } from '@maplibre/maplibre-react-native';
-import { TriangleAlert } from 'lucide-react-native';
-import { useLayoutEffect } from 'react';
+import { CircleUserRound, MapPin, TriangleAlert } from 'lucide-react-native';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 function AttendanceDetailScreen({ navigation, route }) {
   const {
@@ -22,16 +30,16 @@ function AttendanceDetailScreen({ navigation, route }) {
   } = useAuthStore(state => state.config);
   const { themeColor } = useTheme();
   const { attendance } = route.params;
+  const pointRef = useRef(null);
   //   console.log(ROLE);
   const companyGPS = {
     latitude: 22.6667013,
-    longitude: 106.1796360,
-  }
+    longitude: 106.179636,
+  };
   const user = useAuthStore(state => state.user);
   //   console.log(attendance);
   const position = useCurrentPosition();
-  console.log(position);
-  
+
   const MAP_URL =
     'https://api.maptiler.com/maps/base-v4/style.json?key=tZPHtBJcn74rutLOqByE';
   useLayoutEffect(() => {
@@ -69,71 +77,123 @@ function AttendanceDetailScreen({ navigation, route }) {
         </View>
         <View className="flex-row justify-between items-center mt-4 p-4">
           <Text className={'font-bold text-lg'}>Vị trí chấm công</Text>
-          <Text className={'text-primary'}>Bán kính 200m</Text>
+          <Text className={'text-primary'}>Bán kính 50m</Text>
         </View>
         <View className="bg-secondary rounded-lg overflow-hidden mt-2">
           <MapView
             style={{ height: 200, width: '100%', borderRadius: 12 }} // Ưu tiên dùng style inline cho MapView để đảm bảo kích thước
             mapStyle={MAP_URL}
+            touchAndDoubleTapZoom={false}
+            dragPan={false}
+            touchRotate={false}
+            touchPitch={false}
           >
             {position && (
               <>
-                <NativeUserLocation />
                 <Camera
                   center={[companyGPS.longitude, companyGPS.latitude]}
                   duration={2000}
                   easing="fly"
-                  zoom={14}
+                  zoom={17}
                 />
+                {/* <NativeUserLocation /> */}
+
+                <PointAnnotation
+                  id="address"
+                  coordinate={[companyGPS.longitude, companyGPS.latitude]}
+                  anchor={{
+                    x: 0.5,
+                    y: 1.5,
+                  }}
+                >
+                  <Callout id='callout_id' title="Tuyến Công CB"></Callout>
+                </PointAnnotation>
+
+                <MarkerView
+                  coordinate={[companyGPS.longitude, companyGPS.latitude]}
+                  // anchor={{ x: 0.5, y: 1 }}
+                >
+                  <View className="w-8 h-8 items-center justify-center">
+                    <CircleUserRound />
+                  </View>
+                </MarkerView>
+
+                {/* <ShapeSource></ShapeSource> */}
+                <ShapeSource
+                  id="company-radius"
+                  data={createCircle(
+                    [companyGPS.longitude, companyGPS.latitude],
+                    50,
+                  )}
+                >
+                  <FillLayer
+                    id="radius-fill"
+                    style={{
+                      fillColor: 'rgba(0, 122, 255, 0.2)',
+                    }}
+                  ></FillLayer>
+                  <LineLayer
+                    id="radius-line"
+                    style={{
+                      lineColor: 'rgba(0, 122, 255, 0.8)',
+                      lineWidth: 2,
+                    }}
+                  ></LineLayer>
+                </ShapeSource>
               </>
             )}
           </MapView>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">Trạng thái duyệt</Text>
-            <Text className="text-sm text-muted-foreground">
-              {STATUS_TYPE_STRING[attendance.approve] || 'Không xác định'}
-            </Text>
+          <View className="overflow-hidden">
+            <Animated.View entering={FadeInDown.delay(200)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">Trạng thái duyệt</Text>
+              <Text className="text-sm text-muted-foreground">
+                {STATUS_TYPE_STRING[attendance.approve] || 'Không xác định'}
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(400)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">Trạng thái chấm công</Text>
+              <Text className="text-sm text-muted-foreground">
+                {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status] ||
+                  'Không xác định'}
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(600)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">Chấm công lúc</Text>
+              <Text className="text-sm text-muted-foreground">
+                {new Date(attendance.attendAt).toLocaleString()}
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(800)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">Địa chỉ IP</Text>
+              <Text className="text-sm text-muted-foreground">
+                113.161.x.xxx
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(1000)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">GPS</Text>
+              <Text className="text-sm text-muted-foreground">
+                {/* {attendance.gps || 'Không xác định'} */}
+                {companyGPS.latitude}, {companyGPS.longitude}
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(1200)} className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
+              <Text className="">Loại chấm công</Text>
+              <Text className="text-sm text-muted-foreground">
+                {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type] ||
+                  'Không xác định'}
+              </Text>
+            </Animated.View>
+            {user.role !== ROLE.USER && attendance.isFraud && (
+              <Animated.View entering={FadeInDown.delay(1400)} className="flex-row justify-between items-center p-4 gap-4">
+                <Button variant={'destructive'} className={'flex-1 w-1/2'}>
+                  <Text>Từ chối</Text>
+                </Button>
+                <Button className={'flex-1 w-1/2'}>
+                  <Text>Chấp nhận</Text>
+                </Button>
+              </Animated.View>
+            )}
           </View>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">Trạng thái chấm công</Text>
-            <Text className="text-sm text-muted-foreground">
-              {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status] ||
-                'Không xác định'}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">Chấm công lúc</Text>
-            <Text className="text-sm text-muted-foreground">
-              {new Date(attendance.attendAt).toLocaleString()}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">Địa chỉ IP</Text>
-            <Text className="text-sm text-muted-foreground">113.161.x.xxx</Text>
-          </View>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">GPS</Text>
-            <Text className="text-sm text-muted-foreground">
-              {attendance.gps || 'Không xác định'}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
-            <Text className="">Loại chấm công</Text>
-            <Text className="text-sm text-muted-foreground">
-              {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type] ||
-                'Không xác định'}
-            </Text>
-          </View>
-          {user.role !== ROLE.USER && attendance.isFraud && (
-            <View className="flex-row justify-between items-center p-4 gap-4">
-              <Button variant={'destructive'} className={'flex-1 w-1/2'}>
-                <Text>Từ chối</Text>
-              </Button>
-              <Button className={'flex-1 w-1/2'}>
-                <Text>Chấp nhận</Text>
-              </Button>
-            </View>
-          )}
         </View>
       </ScrollView>
     </View>
