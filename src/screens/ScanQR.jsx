@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import Corner from '@/components/ui/Coner';
 import { Text } from '@/components/ui/text';
-import useGPSPermisson from '@/hooks/useGPSPermisson';
+import useLocation from '@/hooks/useLocation';
 import useAttendanceStore from '@/store/useAttendanceStore';
 import openAppSettings from '@/utils/openAppSetting';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import {
   Camera,
@@ -15,11 +15,8 @@ import {
 
 function ScanQRScreen({ navigation }) {
   const { hasPermission, requestPermission } = useCameraPermission();
-  const {
-    hasPermission: hasGPSPermission,
-    requestPermission: requestGPSPermission,
-    
-  } = useGPSPermisson();
+ 
+  const { hasPermissionLocation, position, error, requestPermission: requestLocationPermission } = useLocation();
   const handleOpenAppSettings = async () => {
     openAppSettings();
   };
@@ -50,12 +47,10 @@ function ScanQRScreen({ navigation }) {
     if (!hasPermission) {
       requestPermission();
     }
-    console.log(hasGPSPermission);
-    
-    if (!hasGPSPermission) {
-      requestGPSPermission();
+    if (!hasPermissionLocation) {
+      requestLocationPermission();
     }
-  }, [hasPermission, hasGPSPermission]);
+  }, [hasPermission, hasPermissionLocation]);
 
   if (!device) {
     return (
@@ -67,18 +62,18 @@ function ScanQRScreen({ navigation }) {
       </View>
     );
   }
-  if (!hasPermission || !hasGPSPermission) {
+  if (!hasPermission || !hasPermissionLocation) {
     return (
       <View className="flex-1 justify-center items-center p-4 bg-background gap-4">
         {!hasPermission && (
-          <Text>
+          <Text className={'text-center font-bold'}>
             Ứng dụng không có quyền truy cập camera. Vui lòng cấp quyền trong
             cài đặt.
           </Text>
         )}
 
-        {!hasGPSPermission && (
-          <Text>
+        {!hasPermissionLocation && (
+          <Text className={'text-center font-bold'}>
             Ứng dụng không có quyền truy cập vị trí. Vui lòng cấp quyền trong
             cài đặt.
           </Text>

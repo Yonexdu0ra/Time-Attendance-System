@@ -17,7 +17,7 @@ function QrCodeProfileScreen({ navigation }) {
       <View className="justify-center items-center w-full px-4">
         <View className="flex flex-row items-center gap-4">
           <Image
-            source={{ uri: 'https://github.com/shadcn.png' }}
+            source={{ uri: user.avatarUrl }}
             className="w-14 h-14 rounded-full self-center mb-4"
           />
           <Text> {user.fullName}</Text>

@@ -1,15 +1,11 @@
-// navigation/RootNavigator.tsx
+
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '@/screens/Login';
-// import HomeScreen from '@/screens/Home';
-// import NotificationScreen from '@/screens/Notification';
-// import ProfileScreen from '@/screens/Profile';
 import RootTab from './RootTab';
 import NotificationScreen from '@/screens/Notification';
-// import { useAuth } from '../context/AuthContext';
 import SplashScreen from '@/screens/Splash';
 import useAuthStore from '../store/authStore';
-import ScanQRScreen from '@/screens/ScanQRS';
+import ScanQRScreen from '@/screens/ScanQR';
 import StreamQRScreen from '@/screens/StreamQR';
 import LeaveRequestCreate from '@/screens/LeaveRequestCreate';
 import OvertimeRequestCreate from '@/screens/OvertimeRequestCreate';
@@ -84,7 +80,6 @@ function ManagerStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
         headerStyle: { backgroundColor: themeColor.background },
         headerTintColor: themeColor.foreground,
         headerTitleStyle: {

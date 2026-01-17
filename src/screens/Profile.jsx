@@ -1,107 +1,89 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect } from 'react';
 import { Image, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
 import useAuthStore from '../store/authStore';
 import { Text } from '@/components/ui/text';
-import { Switch } from '@/components/ui/switch';
 import { QrCode, Settings } from 'lucide-react-native';
+
+function InfoRow({ label, value }) {
+  return (
+    <View className="bg-secondary rounded-xl p-4 gap-1">
+      <Text className="text-xs text-muted-foreground font-semibold">
+        {label}
+      </Text>
+      <Text className="text-base">
+        {value || '—'}
+      </Text>
+    </View>
+  );
+}
 
 function ProfileScreen({ navigation }) {
   const user = useAuthStore.getState().user;
-  const { themeColor, toggleColorScheme, theme } = useTheme();
-  const logout = useAuthStore(state => state.logout);
+  const { themeColor } = useTheme();
+
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: 'Hồ sơ cá nhân',
       headerLeft: () => (
         <TouchableOpacity
-          className="font-bold ml-4 "
+          className="ml-4"
           onPress={() => navigation.getParent()?.push('QrCodeProfile')}
         >
-          <QrCode size={24} color={themeColor.foreground} />
+          <QrCode size={22} color={themeColor.foreground} />
         </TouchableOpacity>
       ),
       headerRight: () => (
         <TouchableOpacity
-          className="font-bold mr-4 "
+          className="mr-4"
           onPress={() => navigation.getParent()?.push('Settings')}
         >
-          <Settings size={24} color={themeColor.foreground} />
+          <Settings size={22} color={themeColor.foreground} />
         </TouchableOpacity>
       ),
     });
   }, [navigation, themeColor]);
+
   return (
     <View
-      className="flex-1 justify-center items-center"
+      className="flex-1"
       style={{ backgroundColor: themeColor.background }}
     >
       <ScrollView
-        className="w-full px-4"
-        contentContainerStyle={{ paddingVertical: 20 }}
-        keyboardShouldPersistTaps="handled"
+        className="px-4"
+        contentContainerStyle={{ paddingVertical: 24 }}
+        showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={{ uri: user.avatarUrl }}
-          className="w-24 h-24 rounded-full self-center mb-4"
-        />
-
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Giao diện
-          </Text>
-          <Switch
-            checked={theme === 'dark'}
-            onCheckedChange={toggleColorScheme}
+        {/* ===== AVATAR ===== */}
+        <View className="items-center mb-6">
+          <Image
+            source={{ uri: user.avatarUrl }}
+            className="w-24 h-24 rounded-full mb-3"
           />
-        </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Chức vụ
+          <Text className="text-lg font-bold">
+            {user.fullName}
           </Text>
-          <Input value={user.position?.name} disabled />
-        </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Họ và tên
+          <Text className="text-sm text-muted-foreground">
+            {user.position?.name}
           </Text>
-          <Input value={user.fullName} />
         </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Email
+
+        {/* ===== INFO ===== */}
+        <View className="gap-3">
+          <InfoRow label="Phòng ban" value={user.department.name} />
+          <InfoRow label="Email" value={user.email} />
+          <InfoRow label="Số điện thoại" value={user.phone} />
+          <InfoRow label="Ngày sinh" value={user.birthday} />
+          <InfoRow label="Địa chỉ" value={user.address} />
+        </View>
+
+        {/* ===== NOTE ===== */}
+        <View className="mt-6 items-center">
+          <Text className="text-xs text-muted-foreground text-center">
+            Thông tin cá nhân được quản lý bởi hệ thống nhân sự{'\n'}
+            Nếu cần chỉnh sửa, vui lòng liên hệ quản trị
           </Text>
-          <Input value={user.email} />
         </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Số điện thoại
-          </Text>
-          <Input value={user.phone} />
-        </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Ngày sinh
-          </Text>
-          <Input value={user.birthday} />
-        </View>
-        <View className="flex flex-col gap-2">
-          <Text variant="muted" className={'font-bold'}>
-            Địa chỉ
-          </Text>
-          <Input value={user.address} />
-        </View>
-        <Button className="mt-4">
-          <Text>Cập nhật</Text>
-        </Button>
-        <Button
-          className={'mt-4'}
-          onPress={() => logout()}
-          variant="destructive"
-        >
-          <Text>Đăng xuất</Text>
-        </Button>
       </ScrollView>
     </View>
   );

@@ -41,7 +41,7 @@ function AttendanceDetailScreen({ navigation, route }) {
   const position = useCurrentPosition();
 
   const MAP_URL =
-    'https://api.maptiler.com/maps/base-v4/style.json?key=tZPHtBJcn74rutLOqByE';
+    'https://api.maptiler.com/maps/bright-v2/style.json?key=tZPHtBJcn74rutLOqByE';
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: 'Chi tiết chấm công',

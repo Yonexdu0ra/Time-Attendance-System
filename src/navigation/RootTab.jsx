@@ -16,7 +16,7 @@ import {
 } from 'lucide-react-native';
 
 import RequestTopTab from './RequestTopTab';
-import ScanQRScreen from '@/screens/ScanQRS';
+import ScanQRScreen from '@/screens/ScanQR';
 import { useTheme } from '@/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
