@@ -84,7 +84,10 @@ function HomeScreen({ navigation }) {
                   </MapView>
                 </>
               ) : (
-                <View className="justify-center items-center gap-4 flex-row" style={{ height: 200 }}>
+                <View
+                  className="justify-center items-center gap-4 flex-row"
+                  style={{ height: 200 }}
+                >
                   <Text>Loading GPS...</Text>
                   <ActivityIndicator />
                 </View>
@@ -165,19 +168,21 @@ function HomeScreen({ navigation }) {
             </Button>
           </View>
         </View>
-        {notification?.map(item => (
-          <View
-            className={`${
-              item.read ? 'bg-secondary' : 'bg-accent'
-            } rounded-lg p-4 mb-2`}
-            key={item.id}
-          >
-            <Text className="font-bold">{item.title}</Text>
-            <Text className="text-sm text-muted-foreground">
-              {item.message}
-            </Text>
-          </View>
-        ))}
+        <View className="p-4">
+          {notification?.map(item => (
+            <View
+              className={`${
+                item.read ? 'bg-secondary' : 'bg-accent'
+              } rounded-lg p-4 mb-2`}
+              key={item.id}
+            >
+              <Text className="font-bold">{item.title}</Text>
+              <Text className="text-sm text-muted-foreground">
+                {item.message}
+              </Text>
+            </View>
+          ))}
+        </View>
       </ScrollView>
     </View>
   );

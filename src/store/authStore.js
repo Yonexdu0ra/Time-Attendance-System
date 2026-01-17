@@ -8,7 +8,7 @@ const useAuthStore = create((set, get) => ({
   /* ===== STATE ===== */
   loading: true,
   user: null,
-  config: null,
+  config: {},
   /* ===== ACTIONS ===== */
 
 

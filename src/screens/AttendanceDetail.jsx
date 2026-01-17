@@ -13,15 +13,25 @@ import { useLayoutEffect } from 'react';
 import { ScrollView, View } from 'react-native';
 
 function AttendanceDetailScreen({ navigation, route }) {
-  const { SHIFT_TYPE_STRING, SHIFT_ATTENDANCE_TYPE_STRING, ROLE, STATUS_TYPE_STRING ,SHIFT_ATTENDANCE_STATUS_STRING} =
-    useAuthStore(state => state.config);
+  const {
+    SHIFT_TYPE_STRING,
+    SHIFT_ATTENDANCE_TYPE_STRING,
+    ROLE,
+    STATUS_TYPE_STRING,
+    SHIFT_ATTENDANCE_STATUS_STRING,
+  } = useAuthStore(state => state.config);
   const { themeColor } = useTheme();
   const { attendance } = route.params;
-//   console.log(ROLE);
-  
+  //   console.log(ROLE);
+  const companyGPS = {
+    latitude: 22.6667013,
+    longitude: 106.1796360,
+  }
   const user = useAuthStore(state => state.user);
-//   console.log(attendance);
+  //   console.log(attendance);
   const position = useCurrentPosition();
+  console.log(position);
+  
   const MAP_URL =
     'https://api.maptiler.com/maps/base-v4/style.json?key=tZPHtBJcn74rutLOqByE';
   useLayoutEffect(() => {
@@ -31,8 +41,8 @@ function AttendanceDetailScreen({ navigation, route }) {
     });
   }, [navigation]);
   return (
-      <View className="bg-background flex-1 ">
-    <ScrollView className='p-4'>
+    <View className="bg-background flex-1 ">
+      <ScrollView className="p-4">
         {attendance.isFraud && (
           <View className="p-4 rounded-lg border border-destructive/30 bg-destructive/10 flex-row items-center gap-4">
             <TriangleAlert color={themeColor.destructive} />
@@ -70,7 +80,7 @@ function AttendanceDetailScreen({ navigation, route }) {
               <>
                 <NativeUserLocation />
                 <Camera
-                  center={[position.coords.longitude, position.coords.latitude]}
+                  center={[companyGPS.longitude, companyGPS.latitude]}
                   duration={2000}
                   easing="fly"
                   zoom={14}
@@ -87,7 +97,8 @@ function AttendanceDetailScreen({ navigation, route }) {
           <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
             <Text className="">Trạng thái chấm công</Text>
             <Text className="text-sm text-muted-foreground">
-              {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status] || 'Không xác định'}
+              {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status] ||
+                'Không xác định'}
             </Text>
           </View>
           <View className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20">
@@ -124,8 +135,8 @@ function AttendanceDetailScreen({ navigation, route }) {
             </View>
           )}
         </View>
-    </ScrollView>
-      </View>
+      </ScrollView>
+    </View>
   );
 }
 
