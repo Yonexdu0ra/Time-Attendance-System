@@ -27,10 +27,13 @@ import { getDistance } from 'geolib';
 
 function HomeScreen({ navigation }) {
   const { themeColor } = useTheme();
+
   const shifts = useShiftStore(state => state.shifts);
-  const { SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
-  const notification = useNotificationStore(state => state.notifications);
   const initShifts = useShiftStore(state => state.init);
+
+  const { SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
+
+  const notification = useNotificationStore(state => state.notifications);
   const unReadCount = useNotificationStore(state => state.unReadCount);
 
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -47,16 +50,14 @@ function HomeScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (!hasPermission) {
-      requestPermission();
-    }
+    if (!hasPermission) requestPermission();
   }, [hasPermission]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: '',
-      headerRight: () => <Bell />,
       headerLeft: () => <HeaderLeft />,
+      headerRight: () => <Bell />,
     });
   }, [navigation, themeColor, unReadCount]);
 
@@ -64,6 +65,7 @@ function HomeScreen({ navigation }) {
     <View className="flex-1 bg-background">
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="p-4 gap-6">
+
           {/* ===== CA LÀM VIỆC ===== */}
           <Text className="text-lg font-semibold">Ca làm việc hiện tại</Text>
 
@@ -72,9 +74,10 @@ function HomeScreen({ navigation }) {
               latitude: item.latitude || 0,
               longitude: item.longitude || 0,
             };
+
             const to = {
-              latitude: position ? position.coords.latitude : 0,
-              longitude: position ? position.coords.longitude : 0,
+              latitude: position?.coords.latitude || 0,
+              longitude: position?.coords.longitude || 0,
             };
 
             const distance = getDistance(from, to);
@@ -83,13 +86,13 @@ function HomeScreen({ navigation }) {
             return (
               <View
                 key={item.id}
-                className="bg-secondary rounded-2xl overflow-hidden shadow-sm"
+                className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm"
               >
                 {/* ===== MAP ===== */}
                 {position && (
                   <View className="relative">
                     <MapView
-                      style={{ height: 220, width: '100%' }}
+                      style={{ height: 200, width: '100%' }}
                       mapStyle={MAP_URL}
                       touchAndDoubleTapZoom={false}
                       dragPan={false}
@@ -138,34 +141,47 @@ function HomeScreen({ navigation }) {
                       </ShapeSource>
                     </MapView>
 
-                    {/* ===== MAP BUTTONS ===== */}
+                    {/* MAP CONTROLS */}
+                    <View className="absolute top-3 left-3 gap-2">
+                      <Button
+                        className="rounded-full p-2 shadow-lg"
+                        onPress={() => zoom < 20 && setZoom(zoom + 1)}
+                      >
+                        <Plus />
+                      </Button>
+                      <Button
+                        className="rounded-full p-2 shadow-lg"
+                        onPress={() => zoom > 1 && setZoom(zoom - 1)}
+                      >
+                        <Minus />
+                      </Button>
+                    </View>
+
                     <View className="absolute top-3 right-3">
                       <Button
-                        onPress={() => setCurrentPosition(!currentPosition)}
                         className="rounded-full p-2 shadow-lg"
+                        onPress={() => setCurrentPosition(!currentPosition)}
                       >
                         <MapPinned />
                       </Button>
                     </View>
 
-                    <View className="absolute top-3 left-3 gap-2">
-                      <Button
-                        onPress={() => zoom < 20 && setZoom(zoom + 1)}
-                        className="rounded-full p-2 shadow-lg"
-                      >
-                        <Plus />
-                      </Button>
-                      <Button
-                        onPress={() => zoom > 1 && setZoom(zoom - 1)}
-                        className="rounded-full p-2 shadow-lg"
-                      >
-                        <Minus />
-                      </Button>
+                    {/* MAP STATUS */}
+                    <View className="absolute bottom-0 left-3 right-3  rounded-xl p-3">
+                      {isWithinRadius ? (
+                        <Text className="text-green-600 font-semibold text-center">
+                          Bạn đang trong khu vực làm việc
+                        </Text>
+                      ) : (
+                        <Text className="text-destructive font-semibold text-center">
+                          Cách vị trí làm việc {distance} m
+                        </Text>
+                      )}
                     </View>
                   </View>
                 )}
 
-                {/* ===== LOCATION PERMISSION ===== */}
+                {/* LOCATION PERMISSION */}
                 {!hasPermissionLocation && (
                   <View className="p-4">
                     <Text className="text-center font-semibold mb-2">
@@ -177,49 +193,42 @@ function HomeScreen({ navigation }) {
                   </View>
                 )}
 
-                {/* ===== INFO ===== */}
+                {/* SHIFT INFO */}
                 <View className="p-4 gap-2">
-                  <Text className="text-lg font-bold text-primary text-center">
+                  <Text className="text-lg font-bold text-center">
                     {item.name}
                   </Text>
 
-                  <Text className="text-sm text-center">
+                  <Text className="text-sm text-muted-foreground text-center">
                     Ca {SHIFT_TYPE_STRING[item.type]} •{' '}
-                    {new Date(item.workStart).toTimeString().split(' ')[0]} -{' '}
-                    {new Date(item.workEnd).toTimeString().split(' ')[0]}
+                    {new Date(item.workStart).toTimeString().slice(0, 5)} –{' '}
+                    {new Date(item.workEnd).toTimeString().slice(0, 5)}
                   </Text>
 
-                  <Text className="text-xs text-center text-muted-foreground">
+                  <Text className="text-xs text-muted-foreground text-center">
                     {item.address || 'Không xác định'}
                   </Text>
 
                   <Button
-                    className="mt-3 flex-row gap-2 justify-center"
+                    className="mt-4 h-12 rounded-xl flex-row gap-2 justify-center"
                     disabled={!isWithinRadius}
                   >
                     <ScanQrCode color={themeColor.background} />
-                    <Text className="font-bold">Chấm công ngay</Text>
+                    <Text className="font-bold text-base">
+                      Chấm công ngay
+                    </Text>
                   </Button>
-
-                  {isWithinRadius ? (
-                    <Text className="text-green-500 text-sm font-semibold text-center">
-                      Bạn đang trong khu vực làm việc
-                    </Text>
-                  ) : (
-                    <Text className="text-destructive text-sm font-semibold text-center">
-                      Cách vị trí làm việc {distance} m
-                    </Text>
-                  )}
                 </View>
               </View>
             );
           })}
 
-          {/* ===== GPS INFO ===== */}
+          {/* GPS INFO */}
           {position && (
             <View className="items-center gap-1">
               <Text className="text-xs text-muted-foreground">
-                📍 {position.coords.latitude}, {position.coords.longitude}
+                📍 {position.coords.latitude},{' '}
+                {position.coords.longitude}
               </Text>
               <Text className="text-xs text-primary">
                 Sai số GPS ±{Math.round(position.coords.accuracy)}m
@@ -227,48 +236,58 @@ function HomeScreen({ navigation }) {
             </View>
           )}
 
-          {/* ===== TỔNG KẾT ===== */}
-          <Text className="font-semibold">
-            Tóm tắt công việc tháng {new Date().getMonth() + 1}
-          </Text>
+          {/* SUMMARY */}
+          <View className="bg-card rounded-2xl p-4 border border-border">
+            <Text className="font-semibold mb-3">
+              Tóm tắt tháng {new Date().getMonth() + 1}
+            </Text>
 
-          <View className="flex-row gap-3">
-            <View className="flex-1 bg-secondary p-4 rounded-xl items-center">
-              <Text className="text-xs text-muted-foreground">
-                Tổng giờ làm
-              </Text>
-              <Text className="text-xl font-bold">142.5</Text>
-            </View>
-            <View className="flex-1 bg-secondary p-4 rounded-xl items-center">
-              <Text className="text-xs text-muted-foreground">Ngày công</Text>
-              <Text className="text-xl font-bold">18/22</Text>
+            <View className="flex-row gap-3">
+              <View className="flex-1 bg-secondary rounded-xl p-4 items-center">
+                <Text className="text-xs text-muted-foreground">
+                  Tổng giờ làm
+                </Text>
+                <Text className="text-xl font-bold">142.5</Text>
+              </View>
+
+              <View className="flex-1 bg-secondary rounded-xl p-4 items-center">
+                <Text className="text-xs text-muted-foreground">
+                  Ngày công
+                </Text>
+                <Text className="text-xl font-bold">18 / 22</Text>
+              </View>
             </View>
           </View>
 
-          {/* ===== THÔNG BÁO ===== */}
-          <View className="flex-row justify-between items-center">
-            <Text className="font-semibold">Thông báo mới nhất</Text>
-            <Button
-              variant="link"
-              onPress={() => navigation.navigate('Notification')}
-            >
-              <Text>Xem tất cả</Text>
-            </Button>
+          {/* NOTIFICATION */}
+          <View className="bg-card rounded-2xl p-4 border border-border gap-3">
+            <View className="flex-row justify-between items-center">
+              <Text className="font-semibold">Thông báo</Text>
+              <Button
+                variant="link"
+                onPress={() => navigation.navigate('Notification')}
+              >
+                <Text>Xem tất cả</Text>
+              </Button>
+            </View>
+
+            {notification?.slice(0, 3).map(item => (
+              <View
+                key={item.id}
+                className={`rounded-xl p-3 ${
+                  item.read ? 'bg-secondary' : 'bg-accent'
+                }`}
+              >
+                <Text className="font-semibold text-sm">
+                  {item.title}
+                </Text>
+                <Text className="text-xs text-muted-foreground">
+                  {item.message}
+                </Text>
+              </View>
+            ))}
           </View>
 
-          {notification?.map(item => (
-            <View
-              key={item.id}
-              className={`rounded-xl p-4 ${
-                item.read ? 'bg-secondary' : 'bg-accent'
-              }`}
-            >
-              <Text className="font-bold">{item.title}</Text>
-              <Text className="text-sm text-muted-foreground">
-                {item.message}
-              </Text>
-            </View>
-          ))}
         </View>
       </ScrollView>
     </View>

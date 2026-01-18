@@ -6,7 +6,7 @@ import useAuthStore from '@/store/authStore';
 import useLeaveRequestStore from '@/store/leaveRequestStore';
 import { Plus } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
@@ -20,15 +20,14 @@ const LeaveRequestItem = ({
 }) => {
   const { LEAVE_TYPE_STRING, STATUS_TYPE_STRING, STATUS_TYPE, ROLE } = config;
 
-  // Badge màu theo trạng thái
   const badgeClass = (() => {
     switch (item.status) {
       case STATUS_TYPE.PENDING:
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary/10 text-primary';
       case STATUS_TYPE.APPROVED:
-        return 'bg-green-500 text-white';
+        return 'bg-green-500/10 text-green-600';
       case STATUS_TYPE.REJECTED:
-        return 'bg-destructive text-white';
+        return 'bg-destructive/10 text-destructive';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -36,57 +35,85 @@ const LeaveRequestItem = ({
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 80)}
-      className="mx-4 mt-4 rounded-xl bg-background border border-border p-4 shadow-sm"
+      entering={FadeInDown.delay(index * 60)}
+      className="mx-4 mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm"
     >
-      {/* HEADER */}
-      <View className="flex-row justify-between items-start">
-        <View className="flex-1 pr-2">
-          <Text className="text-base font-semibold">
-            {LEAVE_TYPE_STRING[item.leaveType]}
-          </Text>
-          <Text className="text-sm text-muted-foreground mt-1">
-            {new Date(item.startDate).toLocaleDateString()} –{' '}
-            {new Date(item.endDate).toLocaleDateString()}
+      {/* USER HEADER */}
+      <View className="flex-row items-center">
+        <Image
+          source={{ uri: item.user.avatarUrl }}
+          className="h-10 w-10 rounded-full bg-muted"
+        />
+        <View className="ml-3 flex-1">
+          <Text className="font-semibold text-sm">{item.user.fullName}</Text>
+          <Text className="text-xs text-muted-foreground">
+            {new Date(item.createdAt).toLocaleDateString()}
           </Text>
         </View>
 
-        <Badge className={`px-2 py-1 rounded-full ${badgeClass}`}>
-          <Text className="text-xs font-medium">
+        <Badge className={`rounded-full px-3 py-1 ${badgeClass}`}>
+          <Text className="text-xs font-medium whitespace-nowrap">
             {STATUS_TYPE_STRING[item.status]}
           </Text>
         </Badge>
       </View>
 
+      {/* DIVIDER */}
+      <View className="h-px bg-border my-4" />
+
+      {/* META INFO */}
+      <View className="mt-1 flex-row flex-wrap gap-x-6 gap-y-2">
+        {/* SHIFT */}
+        <View>
+          <Text className="text-xs text-muted-foreground">Ca làm việc</Text>
+          <Text className="text-sm font-medium">Phân phối hàng hóa</Text>
+        </View>
+
+        {/* DATE RANGE */}
+        <View>
+          <Text className="text-xs text-muted-foreground">Thời gian nghỉ</Text>
+          <Text className="text-sm font-medium">
+            {new Date(item.startDate).toLocaleDateString()} –{' '}
+            {new Date(item.endDate).toLocaleDateString()}
+          </Text>
+        </View>
+      </View>
+
+      {/* LEAVE TYPE */}
+      <View className="mt-3">
+        <Text className="text-base font-semibold">
+          {LEAVE_TYPE_STRING[item.leaveType]}
+        </Text>
+      </View>
+
       {/* REASON */}
-      <View className="mt-3 bg-muted rounded-lg p-3">
+      <View className="mt-4 rounded-xl bg-muted/50 p-3">
         <Text className="text-xs font-medium text-muted-foreground mb-1">
           Lý do
         </Text>
-        <Text numberOfLines={2}>{item.reason}</Text>
+        <Text className="text-sm leading-5" numberOfLines={3}>
+          {item.reason}
+        </Text>
       </View>
 
       {/* REPLY */}
       {item.reply && (
-        <View className="mt-2 bg-muted rounded-lg p-3">
+        <View className="mt-3 rounded-xl bg-muted/50 p-3">
           <Text className="text-xs font-medium text-muted-foreground mb-1">
             Phản hồi
           </Text>
-          <Text numberOfLines={2}>{item.reply}</Text>
+          <Text className="text-sm leading-5" numberOfLines={3}>
+            {item.reply}
+          </Text>
         </View>
       )}
-
-      {/* CREATED */}
-      <Text className="text-xs italic text-muted-foreground mt-3">
-        Ngày tạo: {new Date(item.createdAt).toLocaleDateString()}
-      </Text>
 
       {/* ACTIONS */}
       {item.status === STATUS_TYPE.PENDING && (
         <View className="mt-4 flex-row gap-2">
           {user.role === ROLE.USER && (
             <Button
-              variant="ghost"
+              variant="outline"
               className="flex-1"
               onPress={() => onCancel(item.id)}
             >
@@ -97,17 +124,18 @@ const LeaveRequestItem = ({
           {(user.role === ROLE.ADMIN || user.role === ROLE.MANAGER) && (
             <>
               <Button
-                variant="destructive"
-                className="flex-1"
+                variant="outline"
+                className="flex-1 border-destructive"
                 onPress={() => onUpdateStatus(item.id, STATUS_TYPE.REJECTED)}
               >
-                <Text className="text-center">Từ chối</Text>
+                <Text className="text-destructive text-center">Từ chối</Text>
               </Button>
+
               <Button
                 className="flex-1 bg-green-500"
                 onPress={() => onUpdateStatus(item.id, STATUS_TYPE.APPROVED)}
               >
-                <Text className="text-center text-white">Duyệt</Text>
+                <Text className="text-white text-center">Duyệt</Text>
               </Button>
             </>
           )}
@@ -152,9 +180,9 @@ function LeaveRequestScreen({ navigation }) {
       <FlatList
         data={leaveRequest}
         keyExtractor={item => item.id}
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: 140 }}
         refreshing={isRefreshing}
         onRefresh={handleRefreshLeaveRequests}
-        contentContainerStyle={{ paddingBottom: 120 }}
         onEndReached={() =>
           !isLoading && !isEnd && handleGetLeaveRequestsCursorPagination()
         }
@@ -168,24 +196,6 @@ function LeaveRequestScreen({ navigation }) {
             onCancel={handleCancelLeaveRequest}
           />
         )}
-        ListEmptyComponent={
-          !isLoading && (
-            <View className="mt-24 items-center">
-              <Text className="text-muted-foreground text-center">
-                Chưa có yêu cầu nghỉ phép
-              </Text>
-            </View>
-          )
-        }
-        ListFooterComponent={
-          (isLoading || isRefreshing) && !isEnd && (
-            <ActivityIndicator
-              className="my-4"
-              size="large"
-              color={themeColor.primary}
-            />
-          )
-        }
       />
 
       {/* FAB */}

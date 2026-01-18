@@ -10,6 +10,20 @@ import { Picker } from '@react-native-picker/picker';
 import useLeaveRequestStore from '@/store/leaveRequestStore';
 import useAuthStore from '@/store/authStore';
 
+/* ===== SECTION ===== */
+function Section({ title, children }) {
+  return (
+    <View className="gap-3">
+      <Text className="text-sm font-semibold text-muted-foreground">
+        {title}
+      </Text>
+      <View className="bg-card border border-border rounded-2xl p-4 gap-4">
+        {children}
+      </View>
+    </View>
+  );
+}
+
 function LeaveRequestScreen({ navigation }) {
   const formData = useLeaveRequestStore(state => state.formData);
   const setFormData = useLeaveRequestStore(state => state.setFormData);
@@ -38,6 +52,9 @@ function LeaveRequestScreen({ navigation }) {
   const safeEndDate =
     formData.endDate instanceof Date ? formData.endDate : safeStartDate;
 
+    const maxiumEndDate = new Date(safeStartDate);
+    maxiumEndDate.setDate(maxiumEndDate.getDate() + 2);
+
   /* ---------- HANDLERS ---------- */
   const handleChangeLeaveType = value => {
     setFormData({
@@ -46,7 +63,6 @@ function LeaveRequestScreen({ navigation }) {
   };
 
   const onChange = (event, selectedDate) => {
-    // Android có dismissed / set
     if (event.type !== 'set') {
       setShow({ startDate: false, endDate: false });
       return;
@@ -71,9 +87,13 @@ function LeaveRequestScreen({ navigation }) {
   };
 
   return (
-    <View className="flex-1 p-4 bg-background">
-      <ScrollView className="">
-        {/* START DATE PICKER */}
+    <View className="flex-1 bg-background">
+      <ScrollView
+        className="px-4"
+        contentContainerStyle={{ paddingVertical: 20, paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ===== DATE PICKER ===== */}
         {show.startDate && (
           <DateTimePicker
             value={safeStartDate}
@@ -84,65 +104,83 @@ function LeaveRequestScreen({ navigation }) {
           />
         )}
 
-        {/* END DATE PICKER */}
         {show.endDate && (
           <DateTimePicker
             value={safeEndDate}
             minimumDate={safeStartDate}
+            maximumDate={maxiumEndDate}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={onChange}
           />
         )}
 
-        <View className="p-4 flex flex-col gap-4">
-          {/* DATE BUTTONS */}
-          <View className="flex flex-row gap-4 w-full">
-            <View className="flex-1 gap-2">
-              <Text variant="small">Thời gian bắt đầu</Text>
-              <Button
-                variant="outline"
-                onPress={() => {
-                  setShow({ startDate: false, endDate: false });
-                  setTimeout(() => {
-                    setShow({ startDate: true, endDate: false });
-                  }, 0);
-                }}
-              >
-                <Text>{safeStartDate.toLocaleDateString('vi-VN')}</Text>
-              </Button>
+        <View className="gap-6">
+          {/* ===== TIME ===== */}
+          <Section title="Thời gian nghỉ phép">
+            <View className="flex-row gap-3">
+              <View className="flex-1 gap-2">
+                <Text className="text-xs text-muted-foreground">
+                  Ngày bắt đầu
+                </Text>
+                <Button
+                  variant="outline"
+                  onPress={() => {
+                    setShow({ startDate: false, endDate: false });
+                    setTimeout(
+                      () => setShow({ startDate: true, endDate: false }),
+                      0,
+                    );
+                  }}
+                >
+                  <Text>
+                    {safeStartDate.toLocaleDateString('vi-VN')}
+                  </Text>
+                </Button>
+              </View>
+
+              <View className="flex-1 gap-2">
+                <Text className="text-xs text-muted-foreground">
+                  Ngày kết thúc
+                </Text>
+                <Button
+                  variant="outline"
+                  onPress={() => {
+                    setShow({ startDate: false, endDate: false });
+                    setTimeout(
+                      () => setShow({ startDate: false, endDate: true }),
+                      0,
+                    );
+                  }}
+                >
+                  <Text>
+                    {safeEndDate.toLocaleDateString('vi-VN')}
+                  </Text>
+                </Button>
+              </View>
             </View>
 
-            <View className="flex-1 gap-2">
-              <Text variant="small">Thời gian kết thúc</Text>
-              <Button
-                variant="outline"
-                onPress={() => {
-                  setShow({ startDate: false, endDate: false });
-                  setTimeout(() => {
-                    setShow({ startDate: false, endDate: true });
-                  }, 0);
-                }}
-              >
-                <Text>{safeEndDate.toLocaleDateString('vi-VN')}</Text>
-              </Button>
+            <View className="flex-row justify-between items-center bg-secondary rounded-xl px-4 py-3">
+              <Text className="text-xs text-muted-foreground">
+                Số ngày nghỉ tối đa
+              </Text>
+              <Text className="font-semibold text-primary">
+                3 ngày
+              </Text>
             </View>
-          </View>
+          </Section>
 
-          {/* INFO */}
-          <View className="p-4 rounded-lg bg-secondary flex flex-row justify-between items-center">
-            <Text variant="muted">Tổng số ngày nghỉ tối đa</Text>
-            <Text className="text-blue-500">3 ngày</Text>
-          </View>
-
-          {/* LEAVE TYPE */}
-          <View>
-            <Text>Chọn loại nghỉ phép</Text>
+          {/* ===== LEAVE TYPE ===== */}
+          <Section title="Loại nghỉ phép">
             <Picker
               selectedValue={formData.leaveType}
               onValueChange={handleChangeLeaveType}
             >
-              <Picker.Item label="Chọn loại nghỉ phép" value="" enabled={false} />
+              <Picker.Item
+                label="Chọn loại nghỉ phép"
+                value=""
+                enabled={false}
+              />
               {Object.entries(LEAVE_TYPE).map(([key, value]) => (
                 <Picker.Item
                   key={key}
@@ -151,33 +189,36 @@ function LeaveRequestScreen({ navigation }) {
                 />
               ))}
             </Picker>
-          </View>
+          </Section>
 
-          {/* REASON */}
-          <View>
-            <Label>Lý do nghỉ phép</Label>
+          {/* ===== REASON ===== */}
+          <Section title="Lý do nghỉ phép">
+            <Label>Lý do</Label>
             <Input
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              className="h-24 mt-2"
+              className="h-28"
               placeholder="Nhập lý do nghỉ phép..."
               value={formData.reason}
               onChangeText={value => setFormData({ reason: value })}
             />
-          </View>
-
-          {/* SUBMIT */}
+          </Section>
         </View>
       </ScrollView>
-      <Button
-        onPress={() => {
-          handleCreateLeaveRequest(navigation);
-          navigation.goBack();
-        }}
-      >
-        <Text>Gửi yêu cầu</Text>
-      </Button>
+
+      {/* ===== SUBMIT ===== */}
+      <View className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+        <Button
+          className="h-12 rounded-xl"
+          onPress={() => {
+            handleCreateLeaveRequest(navigation);
+            navigation.goBack();
+          }}
+        >
+          <Text className="font-semibold">Gửi yêu cầu</Text>
+        </Button>
+      </View>
     </View>
   );
 }

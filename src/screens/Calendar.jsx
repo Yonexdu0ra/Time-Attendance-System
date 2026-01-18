@@ -74,8 +74,9 @@ function CalendarScreen({ navigation }) {
           ...(result[d]?.dots || []),
           {
             key: h.id,
-            color: themeColor.error, // đỏ theo theme
+            color: themeColor.destructive,
             name: h.name,
+            type: 'holiday',
           },
         ],
       };
@@ -90,8 +91,9 @@ function CalendarScreen({ navigation }) {
           ...(result[d]?.dots || []),
           {
             key: a.id,
-            color: themeColor.primary, // xanh theo theme
+            color: themeColor.primary,
             name: a.shift.name,
+            type: 'attendance',
           },
         ],
       };
@@ -104,7 +106,7 @@ function CalendarScreen({ navigation }) {
 
   return (
     <FlatList
-      className="flex-1 px-4 bg-background"
+      className="flex-1 bg-background"
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
@@ -113,105 +115,130 @@ function CalendarScreen({ navigation }) {
         />
       }
       ListHeaderComponent={
-        <>
-          {/* Calendar */}
-          <Calendar
-            key={themeColor.background} // đổi key sẽ force re-render khi theme thay đổi
-            markingType="multi-dot"
-            markedDates={markedDates}
-            onDayPress={d => setSelected(d.dateString)}
-            theme={{
-              backgroundColor: themeColor.background,
-              calendarBackground: themeColor.background,
-              textSectionTitleColor: themeColor.foreground,
-              textSectionTitleDisabledColor: themeColor.mutedForeground,
-              dayTextColor: themeColor.foreground,
-              textDisabledColor: themeColor.mutedForeground,
-              todayTextColor: themeColor.primary,
-              selectedDayBackgroundColor: themeColor.primary,
-              selectedDayTextColor: themeColor.primaryForeground,
-              monthTextColor: themeColor.foreground,
-              arrowColor: themeColor.primary,
-              dotColor: themeColor.primary,
-              selectedDotColor: themeColor.primaryForeground,
-              textDayFontWeight: '500',
-              textMonthFontWeight: '600',
-              textDayHeaderFontWeight: '600',
-              textDayFontSize: 14,
-              textMonthFontSize: 16,
-              textDayHeaderFontSize: 14,
-            }}
-          />
+        <View className="px-4 pt-4">
+          {/* ===== CALENDAR CARD ===== */}
+          <View className="rounded-3xl bg-card border border-border overflow-hidden shadow-sm">
+            <Calendar
+              key={themeColor.background}
+              markingType="multi-dot"
+              markedDates={markedDates}
+              onDayPress={d => setSelected(d.dateString)}
+              theme={{
+                backgroundColor: themeColor.background,
+                calendarBackground: themeColor.background,
+                textSectionTitleColor: themeColor.foreground,
+                textSectionTitleDisabledColor: themeColor.mutedForeground,
+                dayTextColor: themeColor.foreground,
+                textDisabledColor: themeColor.mutedForeground,
+                todayTextColor: themeColor.primary,
+                selectedDayBackgroundColor: themeColor.primary,
+                selectedDayTextColor: themeColor.primaryForeground,
+                monthTextColor: themeColor.foreground,
+                arrowColor: themeColor.primary,
+                dotColor: themeColor.primary,
+                selectedDotColor: themeColor.primaryForeground,
+                textDayFontWeight: '500',
+                textMonthFontWeight: '600',
+                textDayHeaderFontWeight: '600',
+                textDayFontSize: 14,
+                textMonthFontSize: 16,
+                textDayHeaderFontSize: 13,
+              }}
+            />
+          </View>
 
-          {/* Info Section */}
-          <Text className="mt-4 mb-2 text-lg font-semibold">
-            Thông tin ngày {selected}
-          </Text>
+          {/* ===== DAY SUMMARY ===== */}
+          <View className="mt-6 mb-3">
+            <Text className="text-lg font-bold">Ngày {selected}</Text>
+            <Text className="text-sm text-muted-foreground">
+              Tổng sự kiện: {selectedItems.length}
+            </Text>
+          </View>
 
           {selectedItems.length === 0 && (
-            <Text className="text-muted-foreground mb-4">
-              Không có dữ liệu cho ngày này
-            </Text>
+            <View className="bg-muted/40 rounded-xl p-4">
+              <Text className="text-muted-foreground text-center">
+                Không có dữ liệu trong ngày này
+              </Text>
+            </View>
           )}
-        </>
+        </View>
       }
       data={selectedItems}
       keyExtractor={item => item.key.toString()}
       renderItem={({ item, index }) => (
         <Animated.View
-          entering={FadeInUp.delay(index * 80)}
-          className="mb-2 p-3 rounded-xl bg-card border border-border"
+          entering={FadeInUp.delay(index * 60)}
+          className="mx-4 mb-3 rounded-2xl bg-card border border-border p-4"
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center gap-3">
             <View
-              className="w-2 h-2 rounded-full mr-2"
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <Text className="font-medium">{item.name}</Text>
+            <View className="flex-1">
+              <Text className="font-semibold">{item.name}</Text>
+              <Text className="text-xs text-muted-foreground">
+                {item.type === 'holiday' ? 'Ngày nghỉ' : 'Ca làm việc'}
+              </Text>
+            </View>
           </View>
         </Animated.View>
       )}
       ListFooterComponent={
-        <>
-          <Text className="mt-6 mb-2 text-lg font-semibold">
-            Lịch sử chấm công
-          </Text>
+        <View className="px-4 pt-6 pb-10">
+          {/* ===== HISTORY ===== */}
+          <Text className="text-lg font-bold mb-3">Lịch sử chấm công</Text>
 
           {shiftAttendances.length === 0 && (
-            <Text className="text-muted-foreground">
-              Chưa có dữ liệu chấm công
-            </Text>
+            <View className="bg-muted/40 rounded-xl p-4">
+              <Text className="text-muted-foreground text-center">
+                Chưa có dữ liệu chấm công
+              </Text>
+            </View>
           )}
 
           {shiftAttendances.map((attendance, index) => (
-            <TouchableOpacity
+            <Animated.View
               key={attendance.id}
-              className="mb-3 p-4 rounded-2xl bg-card border border-border"
-              onPress={() => {
-                navigation.push('AttendanceDetail', { attendance });
-              }}
+              entering={FadeInUp.delay(index * 40)}
             >
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="font-semibold text-base">
-                  {attendance.shift.name}
-                </Text>
-                <Badge variant="outline">
-                   <Text>Ca {SHIFT_TYPE_STRING[attendance.shift.type]}</Text>
-                </Badge>
-              </View>
+              <TouchableOpacity
+                className="mb-4 rounded-2xl bg-card border border-border p-4"
+                onPress={() =>
+                  navigation.push('AttendanceDetail', {
+                    attendance,
+                  })
+                }
+              >
+                {/* HEADER */}
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="font-semibold text-base">
+                    {attendance.shift.name}
+                  </Text>
+                  <Badge variant="outline">
+                    <Text className="text-xs">
+                      Ca {SHIFT_TYPE_STRING[attendance.shift.type]}
+                    </Text>
+                  </Badge>
+                </View>
 
-              <Text className="text-sm text-muted-foreground">
-                Chấm công lúc: {attendance.attendAt}
-              </Text>
-              <Text className="text-sm text-muted-foreground">
-                Loại: {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}
-              </Text>
-              <Text className="text-sm text-muted-foreground">
-                Trạng thái: {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
-              </Text>
-            </TouchableOpacity>
+                {/* META */}
+                <View className="gap-1">
+                  <Text className="text-sm text-muted-foreground">
+                    {attendance.attendAt}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground">
+                    {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
-        </>
+        </View>
       }
     />
   );

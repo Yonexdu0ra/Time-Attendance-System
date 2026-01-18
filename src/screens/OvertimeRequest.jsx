@@ -6,65 +6,109 @@ import useOvertimeRequestStore from '@/store/overtimeRequestStore';
 import formatTime from '@/utils/formatTime';
 import { Plus } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { View, FlatList } from 'react-native';
+import { View, FlatList, Image } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
-const OvertimeRequestItem = ({ item, index, config, user, onUpdate, onCancel }) => {
+const OvertimeRequestItem = ({
+  item,
+  index,
+  config,
+  user,
+  onUpdate,
+  onCancel,
+}) => {
   const { STATUS_TYPE_STRING, STATUS_TYPE, ROLE } = config;
 
-  // Badge class theo trạng thái
   const badgeClass = (() => {
     switch (item.status) {
-      case STATUS_TYPE.PENDING: return 'bg-primary text-primary-foreground';
-      case STATUS_TYPE.APPROVED: return 'bg-green-500 text-white';
-      case STATUS_TYPE.REJECTED: return 'bg-destructive text-white';
-      default: return 'bg-muted text-muted-foreground';
+      case STATUS_TYPE.PENDING:
+        return 'bg-primary/10 text-primary';
+      case STATUS_TYPE.APPROVED:
+        return 'bg-green-500/10 text-green-600';
+      case STATUS_TYPE.REJECTED:
+        return 'bg-destructive/10 text-destructive';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   })();
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 80)}
-      className="mx-4 mt-4 rounded-xl bg-background border border-border p-4 shadow-sm"
+      entering={FadeInDown.delay(index * 60)}
+      className="mx-4 mt-4 rounded-2xl bg-card border border-border p-4 shadow-sm"
     >
-      {/* HEADER */}
-      <View className="flex-row justify-between items-center">
-        <Text className="font-semibold text-base">
-          {new Date(item.date).toLocaleDateString()}
-        </Text>
-        <Badge className={`px-2 py-1 rounded-full ${badgeClass}`}>
-          <Text className="text-xs font-medium">
+      {/* USER HEADER */}
+      <View className="flex-row items-center">
+        <Image
+          source={{
+            uri: item.user?.avatarUrl,
+          }}
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+        />
+
+        <View className="ml-3 flex-1">
+          <Text className="text-sm font-semibold">
+            {item.user?.fullName}
+          </Text>
+          <Text className="text-xs text-muted-foreground">
+            {new Date(item.createdAt).toLocaleDateString()}
+          </Text>
+        </View>
+
+        <Badge className={`rounded-full px-3 py-1 ${badgeClass}`}>
+          <Text className="text-xs font-medium whitespace-nowrap">
             {STATUS_TYPE_STRING[item.status]}
           </Text>
         </Badge>
       </View>
 
-      {/* TIME */}
-      <Text className="text-sm text-muted-foreground mt-1">
-        {formatTime(new Date(item.timeStart))} – {formatTime(new Date(item.timeEnd))}
-      </Text>
+      {/* DIVIDER */}
+      <View className="h-px bg-border my-4" />
+
+      {/* META INFO */}
+      <View className="flex-row flex-wrap gap-x-6 gap-y-2">
+        {/* SHIFT */}
+        <View>
+          <Text className="text-xs text-muted-foreground">Ca làm việc</Text>
+          <Text className="text-sm font-medium">
+            {item.shift?.name || 'Phân phối hàng hóa'}
+          </Text>
+        </View>
+
+        {/* TIME */}
+        <View>
+          <Text className="text-xs text-muted-foreground">
+            Thời gian tăng ca
+          </Text>
+          <Text className="text-sm font-medium">
+            {formatTime(new Date(item.timeStart))} –{' '}
+            {formatTime(new Date(item.timeEnd))}
+          </Text>
+        </View>
+      </View>
 
       {/* REASON */}
-      <View className="mt-3 bg-muted rounded-lg p-3">
+      <View className="mt-4 rounded-xl bg-muted/50 p-3">
         <Text className="text-xs font-medium text-muted-foreground mb-1">
           Lý do
         </Text>
-        <Text numberOfLines={2} ellipsizeMode="tail">{item.reason}</Text>
+        <Text
+          className="text-sm leading-5"
+          numberOfLines={3}
+          ellipsizeMode="tail"
+        >
+          {item.reason}
+        </Text>
       </View>
-
-      {/* FOOTER */}
-      <Text className="text-xs italic text-muted-foreground mt-3">
-        Tạo lúc: {new Date(item.createdAt).toLocaleString()}
-      </Text>
 
       {/* ACTIONS */}
       {item.status === STATUS_TYPE.PENDING && (
-        <View className="flex-row gap-2 mt-4">
+        <View className="mt-4 flex-row gap-2">
           {user.role === ROLE.USER ? (
             <Button
-              variant="ghost"
-              className="flex-1 h-11 rounded-lg"
+              variant="outline"
+              className="flex-1 h-11"
               onPress={() => onCancel(item.id)}
             >
               <Text className="text-destructive text-center">Hủy yêu cầu</Text>
@@ -72,17 +116,18 @@ const OvertimeRequestItem = ({ item, index, config, user, onUpdate, onCancel }) 
           ) : (
             <>
               <Button
-                variant="destructive"
-                className="flex-1 h-11 rounded-lg"
+                variant="outline"
+                className="flex-1 h-11 border-destructive"
                 onPress={() => onUpdate(item.id, STATUS_TYPE.REJECTED)}
               >
-                <Text className="text-center">Từ chối</Text>
+                <Text className="text-destructive text-center">Từ chối</Text>
               </Button>
+
               <Button
-                className="flex-1 h-11 rounded-lg bg-green-500"
+                className="flex-1 h-11 bg-green-500"
                 onPress={() => onUpdate(item.id, STATUS_TYPE.APPROVED)}
               >
-                <Text className="text-center text-white">Phê duyệt</Text>
+                <Text className="text-white text-center">Phê duyệt</Text>
               </Button>
             </>
           )}
@@ -97,10 +142,18 @@ function OvertimeRequestScreen({ navigation }) {
   const init = useOvertimeRequestStore(state => state.init);
   const isLoading = useOvertimeRequestStore(state => state.isLoading);
   const isRefreshing = useOvertimeRequestStore(state => state.isRefreshing);
-  const overtimeRequest = useOvertimeRequestStore(state => state.overtimeRequest);
-  const handleUpdateOvertimeRequestStatus = useOvertimeRequestStore(state => state.handleUpdateOvertimeRequestStatus);
-  const handleRefreshOvertimeRequests = useOvertimeRequestStore(state => state.handleRefreshOvertimeRequests);
-  const handleCancelOvertimeRequest = useOvertimeRequestStore(state => state.handleCancelOvertimeRequest);
+  const overtimeRequest = useOvertimeRequestStore(
+    state => state.overtimeRequest,
+  );
+  const handleUpdateOvertimeRequestStatus = useOvertimeRequestStore(
+    state => state.handleUpdateOvertimeRequestStatus,
+  );
+  const handleRefreshOvertimeRequests = useOvertimeRequestStore(
+    state => state.handleRefreshOvertimeRequests,
+  );
+  const handleCancelOvertimeRequest = useOvertimeRequestStore(
+    state => state.handleCancelOvertimeRequest,
+  );
   const user = useAuthStore(state => state.user);
   const config = useAuthStore(state => state.config);
 
@@ -115,7 +168,7 @@ function OvertimeRequestScreen({ navigation }) {
         keyExtractor={item => item.id}
         refreshing={isRefreshing}
         onRefresh={handleRefreshOvertimeRequests}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: 140 }}
         renderItem={({ item, index }) => (
           <OvertimeRequestItem
             item={item}
@@ -126,15 +179,6 @@ function OvertimeRequestScreen({ navigation }) {
             onCancel={handleCancelOvertimeRequest}
           />
         )}
-        ListEmptyComponent={
-          !isLoading && (
-            <View className="mt-24 items-center">
-              <Text className="text-muted-foreground text-center">
-                Chưa có yêu cầu tăng ca
-              </Text>
-            </View>
-          )
-        }
       />
 
       {/* FAB */}
