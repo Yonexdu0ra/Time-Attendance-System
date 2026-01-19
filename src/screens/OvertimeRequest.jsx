@@ -190,7 +190,7 @@ function OvertimeRequestScreen({ navigation }) {
       if (filter === 'ALL') return true;
       return lr.status === filter;
     });
-  }, [filter]);
+  }, [filter, overtimeRequest]);
   const listFilter = [
     {
       label: 'Tất cả',

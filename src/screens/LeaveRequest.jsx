@@ -211,7 +211,7 @@ function LeaveRequestScreen({ navigation }) {
       if (filter === 'ALL') return true;
       return lr.status === filter;
     });
-  }, [filter]);
+  }, [filter, leaveRequest]);
   const listFilter = [
     {
       label: 'Tất cả',
