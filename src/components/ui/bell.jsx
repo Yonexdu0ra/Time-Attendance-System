@@ -29,7 +29,7 @@ export function Bell() {
         <BellIcon size={24} color={themeColor.foreground} />
         {unReadCount > 0 && (
           <Badge variant={'destructive'} className={'absolute -right-3 -top-3'}>
-            <Text>{unReadCount}</Text>
+            <Text style={{width: unReadCount.toString().length * 8}}>{unReadCount < 10 ? unReadCount : '9+'}</Text>
           </Badge>
         )}
       </Animated.View>

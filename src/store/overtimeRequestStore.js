@@ -8,6 +8,7 @@ const useOvertimeRequestStore = create((set, get) => ({
     isLoading: false,
     isRefreshing: false,
     cursorId: null,
+    isEnd: true,
     formData: {
         date: new Date(),
         timeStart: null,
@@ -34,6 +35,7 @@ const useOvertimeRequestStore = create((set, get) => ({
             set({
                 overtimeRequest: updatedOvertimeRequests,
                 cursorId: response.nextCursorId,
+                isEnd: !response.nextCursorId,
             });
         } catch (error) {
             Toast.show({
@@ -44,7 +46,7 @@ const useOvertimeRequestStore = create((set, get) => ({
         }
     },
     handleRefreshOvertimeRequests: async () => {
-        set({ isRefreshing: true, cursorId: null });
+        set({ isRefreshing: true, cursorId: null, isEnd: false });
         await get().handleGetOvertimeRequestCursorPagination();
         set({ isRefreshing: false });
     },
@@ -78,8 +80,15 @@ const useOvertimeRequestStore = create((set, get) => ({
                 body: JSON.stringify({ status }),
             })
             const updatedRequest = response.data;
-            const updatedOvertimeRequests = get().overtimeRequest.map(item =>
-                item.id === updatedRequest.id ? updatedRequest : item
+            const updatedOvertimeRequests = get().overtimeRequest.map(item => {
+                if (item.id === overtimeRequestId) {
+                    return {
+                        ...item,
+                        ...updatedRequest,
+                    }
+                }
+                return item
+            }
             );
             set({ overtimeRequest: updatedOvertimeRequests });
         } catch (error) {

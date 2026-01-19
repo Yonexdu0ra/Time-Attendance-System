@@ -110,6 +110,7 @@ const useLeaveRequestStore = create((set, get) => ({
                     return {
                         ...item,
                         status,
+                        ...response.data,
                     }
                 }
                 return item;

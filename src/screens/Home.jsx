@@ -1,4 +1,4 @@
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useCameraPermission } from 'react-native-vision-camera';
@@ -65,7 +65,6 @@ function HomeScreen({ navigation }) {
     <View className="flex-1 bg-background">
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="p-4 gap-6">
-
           {/* ===== CA LÀM VIỆC ===== */}
           <Text className="text-lg font-semibold">Ca làm việc hiện tại</Text>
 
@@ -208,15 +207,30 @@ function HomeScreen({ navigation }) {
                   <Text className="text-xs text-muted-foreground text-center">
                     {item.address || 'Không xác định'}
                   </Text>
-
+                  <View className="h-px bg-border my-4" />
+                  <Text className="text-xs text-muted-foreground mb-1">
+                    Quản lý bởi
+                  </Text>
+                  {item.managerShifts?.map(({ manager }) => (
+                    <View className="flex-row items-center" key={manager.id}>
+                      <Image
+                        source={{ uri: manager.avatarUrl }}
+                        className="h-9 w-9 rounded-full bg-muted"
+                      />
+                      <View className="ml-3 flex-1">
+                        <Text className="text-sm font-medium">
+                          {manager.fullName}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                  <View className="h-px bg-border my-4" />
                   <Button
                     className="mt-4 h-12 rounded-xl flex-row gap-2 justify-center"
                     disabled={!isWithinRadius}
                   >
                     <ScanQrCode color={themeColor.background} />
-                    <Text className="font-bold text-base">
-                      Chấm công ngay
-                    </Text>
+                    <Text className="font-bold text-base">Chấm công ngay</Text>
                   </Button>
                 </View>
               </View>
@@ -227,8 +241,7 @@ function HomeScreen({ navigation }) {
           {position && (
             <View className="items-center gap-1">
               <Text className="text-xs text-muted-foreground">
-                📍 {position.coords.latitude},{' '}
-                {position.coords.longitude}
+                📍 {position.coords.latitude}, {position.coords.longitude}
               </Text>
               <Text className="text-xs text-primary">
                 Sai số GPS ±{Math.round(position.coords.accuracy)}m
@@ -251,9 +264,7 @@ function HomeScreen({ navigation }) {
               </View>
 
               <View className="flex-1 bg-secondary rounded-xl p-4 items-center">
-                <Text className="text-xs text-muted-foreground">
-                  Ngày công
-                </Text>
+                <Text className="text-xs text-muted-foreground">Ngày công</Text>
                 <Text className="text-xl font-bold">18 / 22</Text>
               </View>
             </View>
@@ -278,16 +289,13 @@ function HomeScreen({ navigation }) {
                   item.read ? 'bg-secondary' : 'bg-accent'
                 }`}
               >
-                <Text className="font-semibold text-sm">
-                  {item.title}
-                </Text>
+                <Text className="font-semibold text-sm">{item.title}</Text>
                 <Text className="text-xs text-muted-foreground">
                   {item.message}
                 </Text>
               </View>
             ))}
           </View>
-
         </View>
       </ScrollView>
     </View>

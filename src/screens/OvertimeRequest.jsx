@@ -6,7 +6,13 @@ import useOvertimeRequestStore from '@/store/overtimeRequestStore';
 import formatTime from '@/utils/formatTime';
 import { Plus } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { View, FlatList, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
@@ -55,7 +61,10 @@ const OvertimeRequestItem = ({
         </View>
 
         <Badge className={`rounded-full px-3 py-1 ${badgeClass}`}>
-          <Text className="text-xs font-medium text-center" style={{ width: STATUS_TYPE_STRING[item.status].length * 8 }}>
+          <Text
+            className="text-xs font-medium text-center"
+            style={{ width: STATUS_TYPE_STRING[item.status].length * 8 }}
+          >
             {STATUS_TYPE_STRING[item.status]}
           </Text>
         </Badge>
@@ -70,7 +79,7 @@ const OvertimeRequestItem = ({
         <View>
           <Text className="text-xs text-muted-foreground">Ca làm việc</Text>
           <Text className="text-sm font-medium">
-            {item.shift?.name || 'Phân phối hàng hóa'}
+            {item.user?.userShifts[0]?.shift?.name}
           </Text>
         </View>
 
@@ -99,6 +108,27 @@ const OvertimeRequestItem = ({
           {item.reason}
         </Text>
       </View>
+      {/* ACTIONED */}
+      {item.actionedBy && (
+        <>
+          <View className="h-px bg-border my-4" />
+          <Text className="text-xs text-muted-foreground mb-1">Người xử lý</Text>
+          <View className="flex-row items-center ">
+            <Image
+              source={{ uri: item.actionedBy.avatarUrl }}
+              className="h-9 w-9 rounded-full bg-muted"
+            />
+            <View className="ml-3 flex-1">
+              <Text className="text-sm font-medium">
+                {item.actionedBy.fullName}
+              </Text>
+              <Text className="text-xs text-muted-foreground">
+                {new Date(item.actionedAt).toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
 
       {/* ACTIONS */}
       {item.status === STATUS_TYPE.PENDING && (
@@ -174,6 +204,10 @@ function OvertimeRequestScreen({ navigation }) {
   const overtimeRequest = useOvertimeRequestStore(
     state => state.overtimeRequest,
   );
+  const isEnd = useOvertimeRequestStore(state => state.isEnd);
+  const handleGetOvertimeRequestCursorPagination = useOvertimeRequestStore(
+    state => state.handleGetOvertimeRequestCursorPagination,
+  );
   const handleUpdateOvertimeRequestStatus = useOvertimeRequestStore(
     state => state.handleUpdateOvertimeRequestStatus,
   );
@@ -224,7 +258,7 @@ function OvertimeRequestScreen({ navigation }) {
           <FlatList
             data={listFilter}
             horizontal
-            keyExtractor={item => item.value}
+            keyExtractor={item => item.value.toString()}
             renderItem={({ item }) => (
               <RenderFilterItem
                 item={item}
@@ -237,10 +271,14 @@ function OvertimeRequestScreen({ navigation }) {
           />
         }
         data={dataFilter}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id.toString()}
         refreshing={isRefreshing}
         onRefresh={handleRefreshOvertimeRequests}
+        onEndReached={() =>
+          !isEnd && !isLoading && handleGetOvertimeRequestCursorPagination()
+        }
         contentContainerStyle={{ paddingTop: 8, paddingBottom: 140 }}
+        ListFooterComponent={!isEnd && isLoading && <ActivityIndicator />}
         renderItem={({ item, index }) => (
           <OvertimeRequestItem
             item={item}
