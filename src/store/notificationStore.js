@@ -82,7 +82,8 @@ const useNotificationStore = create((set, get) => ({
                 notifications: newNotifications,
                 cursorId: response.nextCursorId || null,
                 isRefreshing: false,
-                unReadCount: totalUnread,
+                unReadCount: totalUnread ,
+                isEnd: response.nextCursorId ? false : true,
             });
         } catch (error) {
             Toast.show({

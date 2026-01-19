@@ -5,8 +5,8 @@ import useAuthStore from '@/store/authStore';
 import useOvertimeRequestStore from '@/store/overtimeRequestStore';
 import formatTime from '@/utils/formatTime';
 import { Plus } from 'lucide-react-native';
-import { useEffect } from 'react';
-import { View, FlatList, Image } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { View, FlatList, Image, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
@@ -48,16 +48,14 @@ const OvertimeRequestItem = ({
         />
 
         <View className="ml-3 flex-1">
-          <Text className="text-sm font-semibold">
-            {item.user?.fullName}
-          </Text>
+          <Text className="text-sm font-semibold">{item.user?.fullName}</Text>
           <Text className="text-xs text-muted-foreground">
             {new Date(item.createdAt).toLocaleDateString()}
           </Text>
         </View>
 
         <Badge className={`rounded-full px-3 py-1 ${badgeClass}`}>
-          <Text className="text-xs font-medium whitespace-nowrap">
+          <Text className="text-xs font-medium text-center" style={{ width: STATUS_TYPE_STRING[item.status].length * 8 }}>
             {STATUS_TYPE_STRING[item.status]}
           </Text>
         </Badge>
@@ -137,8 +135,39 @@ const OvertimeRequestItem = ({
   );
 };
 
+const RenderFilterItem = ({ item, filter, handleOnPressFilter }) => {
+  const active = filter === item.value;
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.75}
+      onPress={() => handleOnPressFilter(item.value)}
+      className={`mr-2 rounded-full border px-4 py-2
+        ${
+          active
+            ? 'bg-primary/10 border-primary'
+            : 'bg-muted/30 border-transparent'
+        }
+      `}
+    >
+      <Text
+        className={`text-sm font-medium
+          ${active ? 'text-primary' : 'text-muted-foreground'}
+        `}
+        style={{ width: item.label.length * 8 }}
+      >
+        {item.label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 /* ===================== SCREEN ===================== */
 function OvertimeRequestScreen({ navigation }) {
+  const [filter, setFilter] = useState('ALL');
+  const handleOnPressFilter = value => {
+    setFilter(value);
+  };
   const init = useOvertimeRequestStore(state => state.init);
   const isLoading = useOvertimeRequestStore(state => state.isLoading);
   const isRefreshing = useOvertimeRequestStore(state => state.isRefreshing);
@@ -156,7 +185,34 @@ function OvertimeRequestScreen({ navigation }) {
   );
   const user = useAuthStore(state => state.user);
   const config = useAuthStore(state => state.config);
-
+  const dataFilter = useMemo(() => {
+    return overtimeRequest.filter(lr => {
+      if (filter === 'ALL') return true;
+      return lr.status === filter;
+    });
+  }, [filter]);
+  const listFilter = [
+    {
+      label: 'Tất cả',
+      value: 'ALL',
+    },
+    {
+      label: 'Đang chờ',
+      value: -1,
+    },
+    {
+      label: 'Đã duyệt',
+      value: 1,
+    },
+    {
+      label: 'Đã từ chối',
+      value: 0,
+    },
+    {
+      label: 'Đã hủy',
+      value: 2,
+    },
+  ];
   useEffect(() => {
     init();
   }, []);
@@ -164,7 +220,23 @@ function OvertimeRequestScreen({ navigation }) {
   return (
     <View className="flex-1 bg-background">
       <FlatList
-        data={overtimeRequest}
+        ListHeaderComponent={
+          <FlatList
+            data={listFilter}
+            horizontal
+            keyExtractor={item => item.value}
+            renderItem={({ item }) => (
+              <RenderFilterItem
+                item={item}
+                filter={filter}
+                handleOnPressFilter={handleOnPressFilter}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ padding: 8 }}
+          />
+        }
+        data={dataFilter}
         keyExtractor={item => item.id}
         refreshing={isRefreshing}
         onRefresh={handleRefreshOvertimeRequests}

@@ -5,8 +5,13 @@ import { useTheme } from '@/context/ThemeContext';
 import useAuthStore from '@/store/authStore';
 import useLeaveRequestStore from '@/store/leaveRequestStore';
 import { Plus } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 /* ===================== ITEM ===================== */
@@ -52,7 +57,7 @@ const LeaveRequestItem = ({
         </View>
 
         <Badge className={`rounded-full px-3 py-1 ${badgeClass}`}>
-          <Text className="text-xs font-medium whitespace-nowrap">
+          <Text className="text-xs text-center font-medium whitespace-nowrap" style={{ width: STATUS_TYPE_STRING[item.status].length * 8 }}>
             {STATUS_TYPE_STRING[item.status]}
           </Text>
         </Badge>
@@ -145,6 +150,31 @@ const LeaveRequestItem = ({
   );
 };
 
+const RenderFilterItem = ({ item, filter, handleOnPressFilter }) => {
+  const active = filter === item.value;
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.75}
+      onPress={() => handleOnPressFilter(item.value)}
+      className={`mr-2 rounded-full border px-4 py-2
+        ${active
+          ? 'bg-primary/10 border-primary'
+          : 'bg-muted/30 border-transparent'
+        }
+      `}
+    >
+      <Text
+        className={`text-sm font-medium
+          ${active ? 'text-primary' : 'text-muted-foreground'}
+        `}
+        style={{ width: item.label.length * 8 }}
+      >
+        {item.label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 /* ===================== SCREEN ===================== */
 function LeaveRequestScreen({ navigation }) {
   const { themeColor } = useTheme();
@@ -152,7 +182,13 @@ function LeaveRequestScreen({ navigation }) {
 
   const config = useAuthStore(state => state.config);
   const user = useAuthStore(state => state.user);
+  const [filter, setFilter] = useState('ALL');
+  const handleOnPressFilter = value => {
+    setFilter(value);
+  };
 
+  
+  
   const init = useLeaveRequestStore(state => state.init);
   const isEnd = useLeaveRequestStore(state => state.isEnd);
   const isLoading = useLeaveRequestStore(state => state.isLoading);
@@ -170,6 +206,34 @@ function LeaveRequestScreen({ navigation }) {
   const handleRefreshLeaveRequests = useLeaveRequestStore(
     state => state.handleRefreshLeaveRequests,
   );
+  const dataFilter = useMemo(() => {
+    return leaveRequest.filter(lr => {
+      if (filter === 'ALL') return true;
+      return lr.status === filter;
+    });
+  }, [filter]);
+  const listFilter = [
+    {
+      label: 'Tất cả',
+      value: 'ALL',
+    },
+    {
+      label: 'Đang chờ',
+      value: -1,
+    },
+    {
+      label: 'Đã duyệt',
+      value: 1,
+    },
+    {
+      label: 'Đã từ chối',
+      value: 0,
+    },
+    {
+      label: 'Đã hủy',
+      value: 2,
+    },
+  ];
 
   useEffect(() => {
     init();
@@ -178,7 +242,23 @@ function LeaveRequestScreen({ navigation }) {
   return (
     <View className="flex-1 bg-background">
       <FlatList
-        data={leaveRequest}
+        ListHeaderComponent={
+          <FlatList
+            data={listFilter}
+            horizontal
+            keyExtractor={item => item.value}
+            renderItem={({ item }) => (
+              <RenderFilterItem
+                item={item}
+                filter={filter}
+                handleOnPressFilter={handleOnPressFilter}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ padding: 8 }}
+          />
+        }
+        data={dataFilter}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingTop: 8, paddingBottom: 140 }}
         refreshing={isRefreshing}
@@ -204,7 +284,7 @@ function LeaveRequestScreen({ navigation }) {
           className="absolute bottom-6 right-6 h-14 w-14 rounded-full items-center justify-center shadow-lg bg-primary"
           onPress={() => navigation.navigate('RequestLeaveCreate')}
         >
-          <Plus size={22} className="text-primary-foreground" />
+          <Plus size={22} color={themeColor.foreground} />
         </Button>
       )}
     </View>
