@@ -4,6 +4,7 @@ import { useTheme } from '@/context/ThemeContext';
 import useAuthStore from '@/store/authStore';
 import useHolidayStore from '@/store/holidayStore';
 import useShiftAttendanceStore from '@/store/shiftAttendanceStore';
+import formatTime from '@/utils/formatTime';
 import { useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
@@ -29,6 +30,12 @@ LocaleConfig.locales['vi'] = {
 };
 LocaleConfig.defaultLocale = 'vi';
 
+const formatDate = iso =>
+  new Date(iso).toLocaleDateString('vi-VN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+  });
 function CalendarScreen({ navigation }) {
   const [selected, setSelected] = useState(
     new Date().toISOString().split('T')[0],
@@ -77,6 +84,7 @@ function CalendarScreen({ navigation }) {
             color: themeColor.destructive,
             name: h.name,
             type: 'holiday',
+            data: h,
           },
         ],
       };
@@ -94,6 +102,7 @@ function CalendarScreen({ navigation }) {
             color: themeColor.primary,
             name: a.shift.name,
             type: 'attendance',
+            data: a,
           },
         ],
       };
@@ -131,7 +140,7 @@ function CalendarScreen({ navigation }) {
                 dayTextColor: themeColor.foreground,
                 textDisabledColor: themeColor.mutedForeground,
                 todayTextColor: themeColor.primary,
-                selectedDayBackgroundColor: themeColor.primary,
+                selectedDayBackgroundColor: themeColor.foreground,
                 selectedDayTextColor: themeColor.primaryForeground,
                 monthTextColor: themeColor.foreground,
                 arrowColor: themeColor.primary,
@@ -149,7 +158,7 @@ function CalendarScreen({ navigation }) {
 
           {/* ===== DAY SUMMARY ===== */}
           <View className="mt-6 mb-3">
-            <Text className="text-lg font-bold">Ngày {selected}</Text>
+            <Text className="text-lg font-bold"> {formatDate(selected)}</Text>
             <Text className="text-sm text-muted-foreground">
               Tổng sự kiện: {selectedItems.length}
             </Text>
@@ -171,18 +180,74 @@ function CalendarScreen({ navigation }) {
           entering={FadeInUp.delay(index * 60)}
           className="mx-4 mb-3 rounded-2xl bg-card border border-border p-4"
         >
-          <View className="flex-row items-center gap-3">
-            <View
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
-            <View className="flex-1">
-              <Text className="font-semibold">{item.name}</Text>
-              <Text className="text-xs text-muted-foreground">
-                {item.type === 'holiday' ? 'Ngày nghỉ' : 'Ca làm việc'}
-              </Text>
-            </View>
-          </View>
+          {item.type === 'holiday' && (
+            <TouchableOpacity activeOpacity={0.8} className="">
+              {/* HEADER */}
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Text className="font-semibold text-base">{item.name}</Text>
+                  <Text className={'text-xs text-muted-foreground'}>Tết dương lịch</Text>
+                </View>
+                <Badge className="bg-destructive/10 text-destructive font-medium">
+                  <Text className={'text-destructive'}>Ngày lễ</Text>
+                </Badge>
+              </View>
+            
+            </TouchableOpacity>
+          )}
+          {item.type === 'attendance' && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className=""
+              onPress={() =>
+                navigation.push('AttendanceDetail', { attendance: item.data })
+              }
+            >
+              {/* HEADER */}
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Text className="font-semibold text-base">
+                    {item.data.shift.name}
+                  </Text>
+                  {/* <Text className="text-xs text-muted-foreground">
+                    {formatDate(item.data.attendAt)}
+                  </Text> */}
+                </View>
+
+                {/* TYPE */}
+                <View className={`px-2 py-1 rounded-full ${'bg-emerald-100'}`}>
+                  <Text className={`text-xs font-medium ${'text-emerald-700'}`}>
+                    {SHIFT_ATTENDANCE_TYPE_STRING[item.data.type]}
+                  </Text>
+                </View>
+              </View>
+
+              {/* BODY */}
+              <View className="mt-3 flex-row items-center justify-between">
+                <Text className="text-2xl font-bold">
+                  {formatTime(item.data.attendAt)}
+                </Text>
+
+                {/* STATUS */}
+                <Text
+                  className={`text-sm font-medium ${
+                    item.data.status === 1
+                      ? 'text-emerald-600'
+                      : item.data.status === 2
+                      ? 'text-amber-600'
+                      : 'text-muted-foreground'
+                  }`}
+                  style={{
+                    width:
+                      SHIFT_ATTENDANCE_STATUS_STRING[item.data.status].length *
+                      8,
+                  }}
+                >
+                  {SHIFT_ATTENDANCE_STATUS_STRING[item.data.status]}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
         </Animated.View>
       )}
       ListFooterComponent={
@@ -198,46 +263,70 @@ function CalendarScreen({ navigation }) {
             </View>
           )}
 
-          {shiftAttendances.map((attendance, index) => (
-            <Animated.View
-              key={attendance.id}
-              entering={FadeInUp.delay(index * 40)}
-            >
-              <TouchableOpacity
-                className="mb-4 rounded-2xl bg-card border border-border p-4"
-                onPress={() =>
-                  navigation.push('AttendanceDetail', {
-                    attendance,
-                  })
-                }
+          {shiftAttendances.map((attendance, index) => {
+            return (
+              <Animated.View
+                key={attendance.id}
+                entering={FadeInUp.delay(index * 30)}
               >
-                {/* HEADER */}
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text className="font-semibold text-base">
-                    {attendance.shift.name}
-                  </Text>
-                  <Badge variant="outline">
-                    <Text className="text-xs">
-                      Ca {SHIFT_TYPE_STRING[attendance.shift.type]}
-                    </Text>
-                  </Badge>
-                </View>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  className="mb-3 rounded-2xl bg-card border border-border p-4"
+                  onPress={() =>
+                    navigation.push('AttendanceDetail', { attendance })
+                  }
+                >
+                  {/* HEADER */}
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className="font-semibold text-base">
+                        {attendance.shift.name}
+                      </Text>
+                      <Text className="text-xs text-muted-foreground">
+                        {formatDate(attendance.attendAt)}
+                      </Text>
+                    </View>
 
-                {/* META */}
-                <View className="gap-1">
-                  <Text className="text-sm text-muted-foreground">
-                    {attendance.attendAt}
-                  </Text>
-                  <Text className="text-sm text-muted-foreground">
-                    {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}
-                  </Text>
-                  <Text className="text-sm text-muted-foreground">
-                    {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
+                    {/* TYPE */}
+                    <View
+                      className={`px-2 py-1 rounded-full ${'bg-emerald-100'}`}
+                    >
+                      <Text
+                        className={`text-xs font-medium ${'text-emerald-700'}`}
+                      >
+                        {SHIFT_ATTENDANCE_TYPE_STRING[attendance.type]}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* BODY */}
+                  <View className="mt-3 flex-row items-center justify-between">
+                    <Text className="text-2xl font-bold">
+                      {formatTime(attendance.attendAt)}
+                    </Text>
+
+                    {/* STATUS */}
+                    <Text
+                      className={`text-sm font-medium ${
+                        attendance.status === 1
+                          ? 'text-emerald-600'
+                          : attendance.status === 2
+                          ? 'text-amber-600'
+                          : 'text-muted-foreground'
+                      }`}
+                      style={{
+                        width:
+                          SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]
+                            .length * 8,
+                      }}
+                    >
+                      {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status]}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
         </View>
       }
     />

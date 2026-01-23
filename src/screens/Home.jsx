@@ -211,8 +211,9 @@ function HomeScreen({ navigation }) {
                   <Text className="text-xs text-muted-foreground mb-1">
                     Quản lý bởi
                   </Text>
-                  {item.managerShifts?.map(({ manager }) => (
-                    <View className="flex-row items-center" key={manager.id}>
+                  <View className='flex-row w-full gap-4 flex-wrap'>
+                    {item.managerShifts?.map(({ manager }) => (
+                    <View className="flex-row items-center w-full" key={manager.id}>
                       <Image
                         source={{ uri: manager.avatarUrl }}
                         className="h-9 w-9 rounded-full bg-muted"
@@ -224,6 +225,7 @@ function HomeScreen({ navigation }) {
                       </View>
                     </View>
                   ))}
+                  </View>
                   <View className="h-px bg-border my-4" />
                   <Button
                     className="mt-4 h-12 rounded-xl flex-row gap-2 justify-center"

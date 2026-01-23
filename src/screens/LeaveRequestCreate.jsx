@@ -9,6 +9,7 @@ import { Picker } from '@react-native-picker/picker';
 
 import useLeaveRequestStore from '@/store/leaveRequestStore';
 import useAuthStore from '@/store/authStore';
+import useShiftStore from '@/store/shiftStore';
 
 /* ===== SECTION ===== */
 function Section({ title, children }) {
@@ -30,6 +31,7 @@ function LeaveRequestScreen({ navigation }) {
   const handleCreateLeaveRequest = useLeaveRequestStore(
     state => state.handleCreateLeaveRequest,
   );
+  const shifts = useShiftStore(state => state.shifts);
 
   const { LEAVE_TYPE_STRING, LEAVE_TYPE } = useAuthStore(state => state.config);
 
@@ -52,13 +54,18 @@ function LeaveRequestScreen({ navigation }) {
   const safeEndDate =
     formData.endDate instanceof Date ? formData.endDate : safeStartDate;
 
-    const maxiumEndDate = new Date(safeStartDate);
-    maxiumEndDate.setDate(maxiumEndDate.getDate() + 2);
+  const maxiumEndDate = new Date(safeStartDate);
+  maxiumEndDate.setDate(maxiumEndDate.getDate() + 2);
 
   /* ---------- HANDLERS ---------- */
   const handleChangeLeaveType = value => {
     setFormData({
       leaveType: LEAVE_TYPE[value],
+    });
+  };
+  const handleChangeShiftId = value => {
+    setFormData({
+      shiftId: value,
     });
   };
 
@@ -133,9 +140,7 @@ function LeaveRequestScreen({ navigation }) {
                     );
                   }}
                 >
-                  <Text>
-                    {safeStartDate.toLocaleDateString('vi-VN')}
-                  </Text>
+                  <Text>{safeStartDate.toLocaleDateString('vi-VN')}</Text>
                 </Button>
               </View>
 
@@ -153,9 +158,7 @@ function LeaveRequestScreen({ navigation }) {
                     );
                   }}
                 >
-                  <Text>
-                    {safeEndDate.toLocaleDateString('vi-VN')}
-                  </Text>
+                  <Text>{safeEndDate.toLocaleDateString('vi-VN')}</Text>
                 </Button>
               </View>
             </View>
@@ -164,12 +167,28 @@ function LeaveRequestScreen({ navigation }) {
               <Text className="text-xs text-muted-foreground">
                 Số ngày nghỉ tối đa
               </Text>
-              <Text className="font-semibold text-primary">
-                3 ngày
-              </Text>
+              <Text className="font-semibold text-primary">3 ngày</Text>
             </View>
           </Section>
-
+          <Section title="Chọn ca muốn xin nghỉ">
+            <Picker
+              selectedValue={formData.shiftId}
+              onValueChange={handleChangeShiftId}
+            >
+              <Picker.Item
+                label="-- Chọn ca muốn xin nghỉ --"
+                value=""
+                enabled={false}
+              />
+              {shifts?.map(shiftItem => (
+                <Picker.Item
+                  key={shiftItem.id}
+                  label={shiftItem.name}
+                  value={shiftItem.id}
+                />
+              ))}
+            </Picker>
+          </Section>
           {/* ===== LEAVE TYPE ===== */}
           <Section title="Loại nghỉ phép">
             <Picker
@@ -209,15 +228,20 @@ function LeaveRequestScreen({ navigation }) {
 
       {/* ===== SUBMIT ===== */}
       <View className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-        <Button
-          className="h-12 rounded-xl"
-          onPress={() => {
-            handleCreateLeaveRequest(navigation);
-            navigation.goBack();
-          }}
-        >
-          <Text className="font-semibold">Gửi yêu cầu</Text>
-        </Button>
+        {shifts?.length < 1  ? (
+          <Text>Hiện tại bạn chưa có ca làm việc nào không thể xin nghỉ</Text>
+        ) : (
+          <Button
+            className="h-12 rounded-xl"
+            onPress={() => {
+              handleCreateLeaveRequest();
+              navigation.goBack();
+            }}
+            disabled={!formData.leaveType || !formData.shiftId}
+          >
+            <Text className="font-semibold">Gửi yêu cầu</Text>
+          </Button>
+        )}
       </View>
     </View>
   );

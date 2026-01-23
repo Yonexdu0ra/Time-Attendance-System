@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useTheme } from '@/context/ThemeContext';
+import useLocation from '@/hooks/useLocation';
 import useAuthStore from '@/store/authStore';
 import createCircle from '@/utils/createCircle';
 import {
@@ -55,8 +56,8 @@ function AttendanceDetailScreen({ navigation, route }) {
   }, [navigation]);
   return (
     <View className="bg-background flex-1 ">
-      <ScrollView className="p-4">
-        {attendance.isFraud && (
+      <ScrollView className="p-4" contentContainerStyle={{ paddingBottom: 40 }}>
+        {(attendance.isFraud || !isWithinRadius) && (
           <View className="p-4 rounded-lg border border-destructive/30 bg-destructive/10 flex-row items-center gap-4">
             <TriangleAlert color={themeColor.destructive} />
 
@@ -72,17 +73,12 @@ function AttendanceDetailScreen({ navigation, route }) {
             </View>
           </View>
         )}
-        <View className="p-4 rounded-lg border bg-secondary mt-2 flex-row justify-between items-center">
-          <Text className="text-2xl font-semibold text-center">
-            {attendance.shift.name}
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            Ca {SHIFT_TYPE_STRING[attendance.shift.type]}
-          </Text>
-        </View>
+        
         <View className="flex-row justify-between items-center mt-4 p-4">
           <Text className={'font-bold text-lg'}>Vị trí chấm công</Text>
-          <Text className={'text-primary'}>Bán kính {attendance.shift.radius}m</Text>
+          <Text className={'text-primary'}>
+            Bán kính {attendance.shift.radius}m
+          </Text>
         </View>
         <View className="bg-secondary rounded-lg overflow-hidden mt-2">
           <MapView
@@ -117,7 +113,7 @@ function AttendanceDetailScreen({ navigation, route }) {
                     y: 1.5,
                   }}
                 >
-                  <Callout id="callout_id" title="Tuyến Công CB"></Callout>
+                  <Callout id="callout_id" title={attendance.shift.name}></Callout>
                 </PointAnnotation>
 
                 <MarkerView
@@ -156,10 +152,22 @@ function AttendanceDetailScreen({ navigation, route }) {
           <View className="overflow-hidden">
             <Animated.View
               entering={FadeInDown.delay(200)}
+              className="p-4 border-b border-muted-foreground/20 items-center"
+            >
+              <Text className="text-lg font-semibold text-primary text-center">  {attendance.shift.name}</Text>
+              
+            </Animated.View>
+            <Animated.View
+              entering={FadeInDown.delay(200)}
               className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20"
             >
               <Text className="">Trạng thái duyệt</Text>
-              <Text className="text-sm text-muted-foreground"  style={{ width: STATUS_TYPE_STRING[attendance.approve].length * 8}}>
+              <Text
+                className="text-sm text-muted-foreground"
+                style={{
+                  width: STATUS_TYPE_STRING[attendance.approve].length * 8,
+                }}
+              >
                 {STATUS_TYPE_STRING[attendance.approve] || 'Không xác định'}
               </Text>
             </Animated.View>
@@ -168,7 +176,14 @@ function AttendanceDetailScreen({ navigation, route }) {
               className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20"
             >
               <Text className="">Trạng thái chấm công</Text>
-              <Text className="text-sm text-muted-foreground" style={{ width: SHIFT_ATTENDANCE_STATUS_STRING[attendance.status].length * 8}}>
+              <Text
+                className="text-sm text-muted-foreground"
+                style={{
+                  width:
+                    SHIFT_ATTENDANCE_STATUS_STRING[attendance.status].length *
+                    8,
+                }}
+              >
                 {SHIFT_ATTENDANCE_STATUS_STRING[attendance.status] ||
                   'Không xác định'}
               </Text>
@@ -195,7 +210,7 @@ function AttendanceDetailScreen({ navigation, route }) {
               entering={FadeInDown.delay(1000)}
               className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20"
             >
-              <Text className="">GPS</Text>
+              <Text className="">Vị trí chấm công</Text>
               <Text className="text-sm text-muted-foreground">
                 {/* {attendance.gps || 'Không xác định'} */}
                 {attendance.latitude}, {attendance.longitude}

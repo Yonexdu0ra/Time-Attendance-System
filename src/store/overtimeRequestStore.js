@@ -1,4 +1,5 @@
 import { request } from '@/utils/request'
+import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message'
 import { create } from 'zustand'
 
@@ -11,9 +12,10 @@ const useOvertimeRequestStore = create((set, get) => ({
     isEnd: true,
     formData: {
         date: new Date(),
-        timeStart: null,
-        timeEnd: null,
+        timeStart: new Date(),
+        timeEnd: new Date(),
         reason: '',
+        shiftId: null,
     },
     setCursorId: (cursorId) => set({ cursorId }),
     setOvertimeRequest: (overtimeRequest) => set({ overtimeRequest }),
@@ -52,6 +54,7 @@ const useOvertimeRequestStore = create((set, get) => ({
     },
     handleCreateOvertimeRequest: async () => {
         try {
+            
             const { formData } = get();
             const response = await request('/overtime-requests', {
                 method: 'POST',
@@ -59,6 +62,7 @@ const useOvertimeRequestStore = create((set, get) => ({
                 body: JSON.stringify(formData),
             });
             const newData = response.data;
+            if(!response.success) throw new Error(response.message || 'Tạo yêu cầu làm thêm giờ thất bại');
             set({ overtimeRequest: [newData, ...get().overtimeRequest] });
             Toast.show({
                 type: 'success',
@@ -109,7 +113,7 @@ const useOvertimeRequestStore = create((set, get) => ({
                 if (item.id === id) {
                     return {
                         ...item,
-                        status: response.data.status,
+                        ...response.data,
                     }
                 }
                 return item;

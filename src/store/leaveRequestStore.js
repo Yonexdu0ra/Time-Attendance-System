@@ -16,6 +16,7 @@ const useLeaveRequestStore = create((set, get) => ({
         endDate: new Date(),
         leaveType: null,
         reason: '',
+        shiftId: null,
     },
     setIsRefreshing: (isRefreshing) => set({ isRefreshing }),
     setCursorId: (cursorId) => set({ cursorId }),
@@ -71,10 +72,21 @@ const useLeaveRequestStore = create((set, get) => ({
     async handleCreateLeaveRequest() {
         try {
             const { formData } = get();
-            await request('/leave-requests', {
+            const response = await request('/leave-requests', {
                 method: 'POST',
                 body: JSON.stringify(formData),
             });
+            if(!response.success) throw new Error('Tạo yêu cầu nghỉ phép thất bại');
+            set({
+                formData: {
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    leaveType: null,
+                    reason: '',
+                    shiftId: null,
+                },
+                leaveRequest: [response.data, ...get().leaveRequest],
+            })
             Toast.show({
                 type: 'success',
                 text1: 'Thành công',
@@ -139,7 +151,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 if (item.id === id) {
                     return {
                         ...item,
-                        status: 'CANCELLED',
+                        ...response.data
                     }
                 }
                 return item;
