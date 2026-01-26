@@ -13,6 +13,7 @@ import QrCodeProfileScreen from '@/screens/QrCodeProfile';
 import AttendanceDetailScreen from '@/screens/AttendanceDetail';
 import SettingScreen from '@/screens/Settings';
 import { useTheme } from '@/context/ThemeContext';
+import ProfileScreen from '@/screens/Profile';
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
@@ -69,6 +70,7 @@ function UserStack() {
       <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
       <Stack.Screen name="Settings" component={SettingScreen} />
       <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
 
     </Stack.Navigator>
   );
@@ -107,6 +109,7 @@ function ManagerStack() {
       <Stack.Screen name="QrCodeProfile" component={QrCodeProfileScreen} />
       <Stack.Screen name="Settings" component={SettingScreen} />
       <Stack.Screen name="AttendanceDetail" component={AttendanceDetailScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );
 }

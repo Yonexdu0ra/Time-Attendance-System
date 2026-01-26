@@ -19,7 +19,13 @@ import {
 } from '@maplibre/maplibre-react-native';
 import HeaderLeft from '@/components/ui/headerRight';
 import { Button } from '@/components/ui/button';
-import { MapPinned, Minus, Plus, ScanQrCode } from 'lucide-react-native';
+import {
+  MapPin,
+  MapPinned,
+  Minus,
+  Plus,
+  ScanQrCode,
+} from 'lucide-react-native';
 import createCircle from '@/utils/createCircle';
 import openAppSettings from '@/utils/openAppSetting';
 import useLocation from '@/hooks/useLocation';
@@ -28,7 +34,7 @@ import { getDistance } from 'geolib';
 function HomeScreen({ navigation }) {
   const { themeColor } = useTheme();
 
-  const shifts = useShiftStore(state => state.shifts);
+  const shiftJoineds = useShiftStore(state => state.shiftJoineds);
   const initShifts = useShiftStore(state => state.init);
 
   const { SHIFT_TYPE_STRING } = useAuthStore(state => state.config);
@@ -68,7 +74,7 @@ function HomeScreen({ navigation }) {
           {/* ===== CA LÀM VIỆC ===== */}
           <Text className="text-lg font-semibold">Ca làm việc hiện tại</Text>
 
-          {shifts?.map(item => {
+          {shiftJoineds?.map(item => {
             const from = {
               latitude: item.latitude || 0,
               longitude: item.longitude || 0,
@@ -211,25 +217,29 @@ function HomeScreen({ navigation }) {
                   <Text className="text-xs text-muted-foreground mb-1">
                     Quản lý bởi
                   </Text>
-                  <View className='flex-row w-full gap-4 flex-wrap'>
+                  <View className="flex-row w-full gap-4 flex-wrap">
                     {item.managerShifts?.map(({ manager }) => (
-                    <View className="flex-row items-center w-full" key={manager.id}>
-                      <Image
-                        source={{ uri: manager.avatarUrl }}
-                        className="h-9 w-9 rounded-full bg-muted"
-                      />
-                      <View className="ml-3 flex-1">
-                        <Text className="text-sm font-medium">
-                          {manager.fullName}
-                        </Text>
+                      <View
+                        className="flex-row items-center w-full"
+                        key={manager.id}
+                      >
+                        <Image
+                          source={{ uri: manager.avatarUrl }}
+                          className="h-9 w-9 rounded-full bg-muted"
+                        />
+                        <View className="ml-3 flex-1">
+                          <Text className="text-sm font-medium">
+                            {manager.fullName}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  ))}
+                    ))}
                   </View>
-                  <View className="h-px bg-border my-4" />
+                  <View className="h-px bg-border my-2" />
                   <Button
-                    className="mt-4 h-12 rounded-xl flex-row gap-2 justify-center"
+                    className="rounded-xl flex-row gap-2 justify-center"
                     disabled={!isWithinRadius}
+                    onPress={() => navigation.navigate('ScanQR', { shiftId: item.id })}
                   >
                     <ScanQrCode color={themeColor.background} />
                     <Text className="font-bold text-base">Chấm công ngay</Text>
@@ -242,11 +252,14 @@ function HomeScreen({ navigation }) {
           {/* GPS INFO */}
           {position && (
             <View className="items-center gap-1">
-              <Text className="text-xs text-muted-foreground">
-                📍 {position.coords.latitude}, {position.coords.longitude}
-              </Text>
+              <View className="flex-row items-center gap-1">
+                <MapPin color={themeColor.destructive} size={15}/>
+                <Text className="text-xs text-muted-foreground">
+                  Vị trí hiện tại: {position.coords.latitude}, {position.coords.longitude}
+                </Text>
+              </View>
               <Text className="text-xs text-primary">
-                Sai số GPS ±{Math.round(position.coords.accuracy)}m
+                Sai số ±{Math.round(position.coords.accuracy)}m
               </Text>
             </View>
           )}

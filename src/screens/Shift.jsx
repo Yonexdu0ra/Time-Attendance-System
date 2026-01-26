@@ -1,199 +1,241 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useCallback } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
-  ScrollView,
   View,
+  FlatList,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import { Button } from '../components/ui/button';
-import { Text } from '../components/ui/text';
-import useShiftStore from '../store/shiftStore';
-import { QrCode } from 'lucide-react-native';
-import useAuthStore from '@/store/authStore';
 import Animated, {
   FadeInDown,
   FadeInLeft,
 } from 'react-native-reanimated';
+import { QrCode } from 'lucide-react-native';
+
+import { useTheme } from '../context/ThemeContext';
+import { Button } from '../components/ui/button';
+import { Text } from '../components/ui/text';
 import { Badge } from '@/components/ui/badge';
+
+import useShiftStore from '../store/shiftStore';
+import useAuthStore from '@/store/authStore';
 
 function ShiftScreen({ navigation }) {
   const { themeColor } = useTheme();
+
   const { STATUS_TYPE, ROLE, SHIFT_TYPE_STRING } = useAuthStore(
     state => state.config,
   );
   const user = useAuthStore(state => state.user);
-  const isLoading = useShiftStore(state => state.isLoading);
-  const shifts = useShiftStore(state => state.shifts);
-  const handleJoinShift = useShiftStore(state => state.handleJoinShift);
-  const handleCancelJoinShift = useShiftStore(
-    state => state.handleCancelJoinShift,
-  );
-  const isRefreshing = useShiftStore(state => state.isRefreshing);
-  const handleRefresh = useShiftStore(state => state.handleRefreshShifts);
-  const init = useShiftStore(state => state.init);
-  const filterOptions = useShiftStore(state => state.filterOptions);
-  const handleChoiceFilterOption = useShiftStore(
-    state => state.handleChoiceFilterOption,
-  );
+
+  const {
+    isLoading,
+    shifts,
+    isRefreshing,
+    filterOptions,
+    init,
+    handleJoinShift,
+    handleCancelJoinShift,
+    handleRefreshShifts,
+    handleChoiceFilterOption,
+  } = useShiftStore();
+
+  /* ===================== INIT ===================== */
   useEffect(() => {
     init();
   }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
         placeholder: 'Tìm kiếm ca làm việc',
-        onChangeText: event => {
-          const text = event.nativeEvent.text;
-          console.log(text);
+        onChangeText: e => {
+          console.log(e.nativeEvent.text);
         },
       },
     });
   }, [navigation]);
-  return (
-    <View className="flex-1" style={{ backgroundColor: themeColor.background }}>
-      <View className="p-4 gap-2">
-        {/* <Input placeholder="Tìm kiếm ca làm việc" /> */}
-        <Text>Sắp xếp theo</Text>
-        <ScrollView
-          horizontal
-          className="bg-background rounded-lg"
-          contentContainerClassName="flex-row gap-4"
-        >
-          {filterOptions.map((option, index) => (
-            <Animated.View
-              key={option.value}
-              entering={FadeInLeft.delay(index * 100)}
+
+  /* ===================== UTILS ===================== */
+  const formatTime = time =>
+    new Date(time).toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  /* ===================== HEADER ===================== */
+  const renderHeader = () => (
+    <View className="p-4 gap-2">
+      <Text>Sắp xếp theo</Text>
+      <FlatList
+        horizontal
+        data={filterOptions}
+        keyExtractor={item => item.value}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 12 }}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(index * 80)}>
+            <Button
+              size="sm"
+              variant={item.isActive ? 'default' : 'outline'}
+              onPress={() => handleChoiceFilterOption(item.value)}
             >
-              <Button
-                onPress={() => handleChoiceFilterOption(option.value)}
-                variant={option.isActive ? 'default' : 'outline'}
-              >
-                <Text>{option.label}</Text>
-              </Button>
-            </Animated.View>
-          ))}
-        </ScrollView>
-      </View>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
-        }
-      >
-        <View
-          className="p-4 gap-4"
-          style={{ backgroundColor: themeColor.secondary }}
+              <Text>{item.label}</Text>
+            </Button>
+          </Animated.View>
+        )}
+      />
+    </View>
+  );
+
+  /* ===================== ITEM ===================== */
+  const renderItem = useCallback(
+    ({ item, index }) => {
+      const isPending = item.userShifts?.find(
+        us => us.type === STATUS_TYPE.PENDING,
+      );
+
+      const isJoined = item.userShifts?.find(
+        us => us.type === STATUS_TYPE.APPROVED,
+      );
+
+      const isNoRequest = !isPending && !isJoined;
+
+      return (
+        <Animated.View
+          entering={FadeInDown.delay(index * 100)}
+          className="mx-4 mb-4 rounded-2xl border border-border bg-background overflow-hidden"
         >
-          {isLoading ? (
-            <ActivityIndicator color={themeColor.primary} />
-          ) : (
-            shifts?.map((shift, index) => {
-              const isPending = shift?.userShifts?.find(
-                us => us.type === STATUS_TYPE.PENDING,
-              );
+          {/* ===== Header ===== */}
+          <View className="px-4 pt-4 flex-row justify-between items-start">
+            <View className="flex-1 pr-2">
+              <Text className="text-lg font-semibold">
+                {item.name}
+              </Text>
+              <Text variant="muted" className="mt-1">
+                 {item.address || 'Chưa có địa điểm'}
+              </Text>
+            </View>
 
-              const isNoHasRequest = shift?.userShifts.every(
-                us =>
-                  us.type === STATUS_TYPE.CANCELLED ||
-                  us.type === STATUS_TYPE.REJECTED,
-              );
+            <Badge>
+              <Text>{SHIFT_TYPE_STRING[item.type]}</Text>
+            </Badge>
+          </View>
 
-              const isJoin = shift?.userShifts.find(
-                us => us.type === STATUS_TYPE.APPROVED,
-              );
-              return (
-                <Animated.View
-                  entering={FadeInDown.delay(index * 200)}
-                  key={shift.id}
-                  className="rounded-[12px] px-4 py-2 border border-border bg-background"
-                >
-                  <View className="p-4 mb-4  flex flex-row justify-between items-center">
-                    <Text className="text-lg font-bold">{shift.name}</Text>
-                    <Badge>
-                      <Text variant="">{SHIFT_TYPE_STRING[shift.type]}</Text>
-                    </Badge>
-                  </View>
-                  <View>
-                    <Text variant="muted">
-                      {new Date(shift.workStart).toLocaleTimeString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}{' '}
-                      -{' '}
-                      {new Date(shift.workEnd).toLocaleTimeString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text variant="muted">
-                      {shift.address || 'Chưa có địa điểm làm việc'}
-                    </Text>
-                  </View>
-                  <View className="flex flex-row justify-between  gap-2">
-                    {isNoHasRequest && (
-                      <Button
-                        className="flex-1"
-                        onPress={() => {
-                          handleJoinShift(shift.id);
-                        }}
-                      >
-                        <Text>Tham gia</Text>
-                      </Button>
-                    )}
-                    {isPending && (
-                      <Button
-                        className="flex-1"
-                        variant="destructive"
-                        onPress={() =>
-                          handleCancelJoinShift(
-                            isPending.id,
-                            STATUS_TYPE.CANCELLED,
-                          )
-                        }
-                      >
-                        <Text>Hủy yêu cầu</Text>
-                      </Button>
-                    )}
-                    {/* {isRejected && (
-                      <Button variant="destructive" className="flex-1" disabled>
-                        <Text>Yêu cầu bị từ chối</Text>
-                      </Button>
-                    )} */}
-                    {isJoin && (
-                      <View className="flex-1 flex flex-row justify-between items-center">
-                        <Text>Bạn đã tham gia</Text>
-                        {(user.role === ROLE.MANAGER ||
-                          user.role === ROLE.ADMIN) && (
-                          <Button
-                            variant="outline"
-                            onPress={() => {
-                              navigation.navigate('StreamQR', {
-                                shiftId: shift.id,
-                                shiftName: shift.name,
-                              });
-                            }}
-                          >
-                            <QrCode color={themeColor.foreground} />
-                          </Button>
-                        )}
-                      </View>
-                    )}
-                  </View>
-                </Animated.View>
-              );
-            })
+          {/* ===== Time Info ===== */}
+          <View className="px-4 mt-4 gap-2">
+            <View className="flex-row justify-between">
+              <Text variant="muted"> Giờ làm</Text>
+              <Text>
+                {formatTime(item.workStart)} –{' '}
+                {formatTime(item.workEnd)}
+              </Text>
+            </View>
+
+           
+          </View>
+
+          {/* ===== Description ===== */}
+          {item.description && (
+            <View className="px-4 mt-3">
+              <Text variant="muted">{item.description}</Text>
+            </View>
           )}
-          {shifts?.length === 0 && (
+
+          {/* ===== Divider ===== */}
+          <View className="h-[1px] bg-border my-4 mx-4" />
+
+          {/* ===== Actions ===== */}
+          <View className="px-4 pb-4 flex-row items-center gap-2">
+            {isNoRequest && (
+              <Button
+                className="flex-1"
+                onPress={() => handleJoinShift(item.id)}
+              >
+                <Text>Tham gia ca</Text>
+              </Button>
+            )}
+
+            {isPending && (
+              <Button
+                className="flex-1"
+                variant="outline"
+                onPress={() =>
+                  handleCancelJoinShift(
+                    isPending.id,
+                    STATUS_TYPE.CANCELLED,
+                  )
+                }
+              >
+                <Text>Hủy yêu cầu</Text>
+              </Button>
+            )}
+
+            {isJoined && (
+              <View className="flex-1 flex-row justify-between items-center">
+                <Text className="text-green-600 font-medium ">
+                   Đã tham gia
+                </Text>
+
+                {(user.role === ROLE.ADMIN ||
+                  user.role === ROLE.MANAGER) && (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onPress={() =>
+                      navigation.navigate('StreamQR', {
+                        shiftId: item.id,
+                        shiftName: item.name,
+                      })
+                    }
+                  >
+                    <QrCode color={themeColor.foreground} />
+                  </Button>
+                )}
+              </View>
+            )}
+          </View>
+        </Animated.View>
+      );
+    },
+    [],
+  );
+
+  /* ===================== RENDER ===================== */
+  return (
+    <View
+      className="flex-1"
+      style={{ backgroundColor: themeColor.background }}
+    >
+      <FlatList
+        data={shifts}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefreshShifts}
+          />
+        }
+        ListEmptyComponent={
+          !isLoading && (
             <Text
-              style={{ color: themeColor.mutedForeground, textAlign: 'center' }}
+              className="text-center mt-10"
+              style={{ color: themeColor.mutedForeground }}
             >
               Không có ca làm việc nào
             </Text>
-          )}
-        </View>
-      </ScrollView>
+          )
+        }
+        ListFooterComponent={
+          isLoading && (
+            <View className="py-10">
+              <ActivityIndicator color={themeColor.primary} />
+            </View>
+          )
+        }
+      />
     </View>
   );
 }

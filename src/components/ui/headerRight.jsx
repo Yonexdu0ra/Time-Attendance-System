@@ -11,7 +11,7 @@ function HeaderLeft() {
     <Animated.View entering={FadeInLeft.delay(500)}>
       <TouchableOpacity
         className="ml-4"
-        onPress={() => navigation?.navigate('Profile')}
+        onPress={() => navigation?.push('Profile')}
       >
         <View className="flex-row items-center gap-2">
           <Image

@@ -42,12 +42,14 @@ function ProfileScreen({ navigation }) {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerShown: true,
       headerTitle: 'Hồ sơ cá nhân',
+      headerBackVisible: true,
       headerLeft: () => (
         <TouchableOpacity
           className="ml-4"
           onPress={() =>
-            navigation.getParent()?.push('QrCodeProfile')
+            navigation?.push('QrCodeProfile')
           }
         >
           <QrCode size={22} color={themeColor.foreground} />
@@ -57,7 +59,7 @@ function ProfileScreen({ navigation }) {
         <TouchableOpacity
           className="mr-4"
           onPress={() =>
-            navigation.getParent()?.push('Settings')
+            navigation?.push('Settings')
           }
         >
           <Settings size={22} color={themeColor.foreground} />

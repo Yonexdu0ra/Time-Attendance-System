@@ -46,6 +46,31 @@ export default function RootTab() {
         }}
       />
       <Tab.Screen
+        name="Shift"
+        component={ShiftScreen}
+        options={{
+          title: 'Ca làm',
+          headerTitleAlign: 'center',
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Clock color={color} size={size} />
+          ),
+        }}
+      />
+      
+      <Tab.Screen
+        name="Attendance"
+        component={ScanQRScreen}
+        options={{
+          title: 'Chấm công',
+          headerShown: true,
+          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => (
+            <ScanQrCode color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Calendar"
         component={CalendarScreen}
         options={{
@@ -54,18 +79,6 @@ export default function RootTab() {
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Calendar color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Shift"
-        component={ScanQRScreen}
-        options={{
-          title: 'Chấm công',
-          headerShown: true,
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color, size }) => (
-            <ScanQrCode color={color} size={size} />
           ),
         }}
       />
@@ -81,7 +94,8 @@ export default function RootTab() {
           ),
         }}
       />
-      <Tab.Screen
+      
+      {/* <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
@@ -90,7 +104,7 @@ export default function RootTab() {
           headerShown: true,
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }

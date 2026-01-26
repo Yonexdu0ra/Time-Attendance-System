@@ -12,6 +12,7 @@ const useShiftStore = create((set, get) => ({
         label: "Sáng", value: 0, isActive: false,
     }],
     shifts: [],
+    shiftJoineds: [],
     isLoading: true,
     isRefreshing: false,
     cursorId: null,
@@ -28,11 +29,30 @@ const useShiftStore = create((set, get) => ({
     handleGetListShiftByCursorPagination: async () => {
         set({ isLoading: true });
         try {
-            const shiftData = await request(`/shifts/joined`);
+            const shiftData = await request(`/shifts`);
             // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
             const newShifts = [...get().shifts, ...shiftData.data];
             set({
                 shifts: newShifts,
+                isLoading: false,
+            });
+        } catch (error) {
+            set({ isLoading: false });
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            })
+        }
+    },
+    handleGetListShiftJoinedByCursorPagination: async () => {
+        set({ isLoading: true });
+        try {
+            const shiftData = await request(`/shifts/joined`);
+            // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
+            const newShifts = [...get().shiftJoineds, ...shiftData.data];
+            set({
+                shiftJoineds: newShifts,
                 isLoading: false,
             });
         } catch (error) {
@@ -122,7 +142,7 @@ const useShiftStore = create((set, get) => ({
                 ...shift,
                 status: shiftStatusData.data.status,
             });
-            set({ shifts: newShifts});
+            set({ shifts: newShifts });
         } catch (error) {
             Toast.show({
                 type: 'error',
@@ -134,12 +154,13 @@ const useShiftStore = create((set, get) => ({
     handleRefreshShifts: async () => {
         set({ isRefreshing: true, cursorId: null });
         try {
-            const shiftData = await request(`/shifts/joined`);
+            const shiftData = await request(`/shifts`);
             // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
             set({
                 shifts: shiftData.data,
                 cursorId: shiftData.data.nextCursorId,
                 isRefreshing: false,
+                isLoading: false,
             });
         } catch (error) {
             Toast.show({
@@ -147,11 +168,32 @@ const useShiftStore = create((set, get) => ({
                 text1: 'Lỗi',
                 text2: error.message,
             });
-            set({ isRefreshing: false });
+            set({ isRefreshing: false, isLoading: false, });
+        }
+    },
+    handleRefreshShiftJoineds: async () => {
+        set({ isRefreshing: true, cursorId: null });
+        try {
+            const shiftData = await request(`/shifts/joined`);
+            // if (shiftData.code !== "SUCCESS") throw new Error(shiftData.message);
+            set({
+                shiftJoineds: shiftData.data,
+                cursorId: shiftData.data.nextCursorId,
+                isRefreshing: false,
+                isLoading: false,
+            });
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: error.message,
+            });
+            set({ isRefreshing: false, isLoading: false, });
         }
     },
     init: () => {
         get().handleRefreshShifts();
+        get().handleRefreshShiftJoineds();
     },
 }));
 
