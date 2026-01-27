@@ -1,5 +1,6 @@
+import { toast } from "sonner-native";
+
 const { request } = require("@/utils/request");
-const { default: Toast } = require("react-native-toast-message");
 const { create } = require("zustand");
 
 
@@ -29,11 +30,7 @@ const useUserShiftStore = create((set, get) => ({
                 isEndPage: !userShiftData.nextCursorId,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            })
+            toast.error(error.message || 'Lấy danh sách ca làm việc của người dùng thất bại');
         }
     },
     handleRefreshListUserShift: async () => {

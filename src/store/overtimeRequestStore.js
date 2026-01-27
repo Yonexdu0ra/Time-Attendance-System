@@ -1,6 +1,5 @@
 import { request } from '@/utils/request'
-import { useNavigation } from '@react-navigation/native';
-import Toast from 'react-native-toast-message'
+import { toast } from 'sonner-native';
 import { create } from 'zustand'
 
 
@@ -40,11 +39,8 @@ const useOvertimeRequestStore = create((set, get) => ({
                 isEnd: !response.nextCursorId,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lấy danh sách yêu cầu làm thêm giờ thất bại',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách yêu cầu làm thêm giờ thất bại');
+             
         }
     },
     handleRefreshOvertimeRequests: async () => {
@@ -64,16 +60,9 @@ const useOvertimeRequestStore = create((set, get) => ({
             const newData = response.data;
             if(!response.success) throw new Error(response.message || 'Tạo yêu cầu làm thêm giờ thất bại');
             set({ overtimeRequest: [newData, ...get().overtimeRequest] });
-            Toast.show({
-                type: 'success',
-                text1: 'Tạo yêu cầu làm thêm giờ thành công',
-            });
+            toast.success('Tạo yêu cầu làm thêm giờ thành công');
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Tạo yêu cầu làm thêm giờ thất bại',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Tạo yêu cầu làm thêm giờ thất bại');
         }
     },
     handleUpdateOvertimeRequestStatus: async (overtimeRequestId, status) => {
@@ -96,11 +85,7 @@ const useOvertimeRequestStore = create((set, get) => ({
             );
             set({ overtimeRequest: updatedOvertimeRequests });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Hủy yêu cầu làm thêm giờ thất bại',
-                text2: error.message,
-            });
+            toast.error('Cập nhật trạng thái yêu cầu làm thêm giờ thất bại');
         }
     },
     handleCancelOvertimeRequest: async (id) => {
@@ -119,18 +104,10 @@ const useOvertimeRequestStore = create((set, get) => ({
                 return item;
             }
             );
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: response.message,
-            });
+            toast.success(response.message);
             set({ overtimeRequest: newDate });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Hủy yêu cầu làm thêm giờ thất bại');
         }
 
     },

@@ -1,5 +1,5 @@
 import { request } from '@/utils/request'
-import Toast from 'react-native-toast-message'
+import { toast } from 'sonner-native'
 import { create } from 'zustand'
 
 
@@ -42,11 +42,8 @@ const useLeaveRequestStore = create((set, get) => ({
                 isEnd: !nextCursorId,
             })
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách yêu cầu nghỉ phép thất bại');
+            
         }
         finally {
             set({ isLoading: false, isRefreshing: false });
@@ -62,11 +59,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 isEnd: !nextCursorId,
             })
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách yêu cầu nghỉ phép thất bại');
         }
     },
     async handleCreateLeaveRequest() {
@@ -87,11 +80,8 @@ const useLeaveRequestStore = create((set, get) => ({
                 },
                 leaveRequest: [response.data, ...get().leaveRequest],
             })
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: 'Yêu cầu nghỉ phép đã được gửi thành công.',
-            });
+            toast.success('Yêu cầu nghỉ phép đã được gửi thành công.');
+          
         } catch (error) {
             console.log(error);
 
@@ -103,11 +93,7 @@ const useLeaveRequestStore = create((set, get) => ({
                     reason: '',
                 }
             })
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Tạo yêu cầu nghỉ phép thất bại');
         }
     },
     async handleUpdateLeaveRequestStatus(id, status) {
@@ -127,18 +113,10 @@ const useLeaveRequestStore = create((set, get) => ({
                 }
                 return item;
             });
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: response.message,
-            });
+            toast.success('Cập nhật trạng thái yêu cầu nghỉ phép thành công');
             set({ leaveRequest: newDate });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Cập nhật trạng thái yêu cầu nghỉ phép thất bại');
         }
     },
     async handleCancelLeaveRequest(id) {
@@ -157,18 +135,10 @@ const useLeaveRequestStore = create((set, get) => ({
                 return item;
             }
             );
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: response.message,
-            });
+            toast.success('Hủy yêu cầu nghỉ phép thành công');
             set({ leaveRequest: newDate });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Hủy yêu cầu nghỉ phép thất bại');
         }
 
     },

@@ -1,5 +1,5 @@
 import { request } from '@/utils/request'
-import Toast from 'react-native-toast-message'
+import { toast } from 'sonner-native';
 import { create } from 'zustand'
 
 
@@ -16,17 +16,10 @@ const useAttendanceStore = create((set, get) => ({
             console.log(response);
 
             if (!response.success) throw new Error(response.message);
-            Toast.show({
-                type: 'success',
-                text1: 'Chấm công thành công',
-                text2: response.message,
-            });
+           toast.success('Chấm công thành công');
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Chấm công thất bại',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Chấm công thất bại');
+              
         }
     }
 }))

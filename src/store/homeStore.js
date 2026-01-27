@@ -1,6 +1,7 @@
-import Toast from "react-native-toast-message";
+
 import { create } from "zustand";
 import { request } from '../utils/request'
+import { toast } from "sonner-native";
 
 const useHomeStore = create((set, get) => ({
     shifts: [],
@@ -19,11 +20,7 @@ const useHomeStore = create((set, get) => ({
         } catch (error) {
             console.log(error);
 
-            return Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: error.message,
-            });
+            return toast.error(error.message || 'Lấy danh sách ca làm việc thất bại');
         }
         finally {
             set({ isLoading: false });
@@ -35,11 +32,8 @@ const useHomeStore = create((set, get) => ({
             const shiftData = await request('/shifts')
             set({ shifts: shiftData.data, isLoading: false, cursorId: shiftData.nextCursorId });
         } catch (error) {
-            return Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: error.message,
-            });
+            return toast.error(error.message || 'Lấy danh sách ca làm việc thất bại');
+           
         } finally {
             set({ isRefreshing: false });
         }

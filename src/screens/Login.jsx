@@ -2,7 +2,6 @@ import { View, Pressable, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { use, useEffect, useLayoutEffect, useState } from 'react';
-import Toast from 'react-native-toast-message';
 import { request } from '../utils/request';
 import useAuthStore from '../store/authStore';
 import accessTokenStore from '../store/accessTokenStore';
@@ -12,6 +11,7 @@ import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { storage } from '@/utils/storage';
+import { toast } from 'sonner-native';
 export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState({
     identifier: '',
@@ -51,19 +51,11 @@ export default function LoginScreen({ navigation }) {
       const configData = await request('/config')
       useAuthStore.setState({ config: configData.data });
       await saveRefreshToken(data.data.refreshToken);
-      Toast.show({
-        type: 'success',
-        text1: 'Đăng nhập thành công',
-        text2: JSON.stringify(data.message),
-      });
+      toast.success('Đăng nhập thành công');
     } catch (error) {
       console.log(error);
 
-      Toast.show({
-        type: 'error',
-        text1: 'Đăng nhập thất bại',
-        text2: error.message || 'Vui lòng kiểm tra lại thông tin đăng nhập',
-      });
+      toast.error('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
       return;
     }
   };

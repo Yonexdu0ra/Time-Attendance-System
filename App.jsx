@@ -9,11 +9,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import './global.css';
 import RootNavigator from './src/navigation/RootNavigator';
 import ThemeProvider from './src/context/ThemeContext';
-import Toast from 'react-native-toast-message';
+// import Toast from 'react-native-toast-message';
 import useAuthStore from './src/store/authStore';
 import { useEffect } from 'react';
 import { PortalHost } from '@rn-primitives/portal';
 import NotificationProvider from '@/context/NotificationContext';
+import { Toaster } from 'sonner-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 function App() {
   const init = useAuthStore(state => state.init);
   useEffect(() => {
@@ -21,15 +24,19 @@ function App() {
   }, []);
   return (
     // <AuthProvider>
-    <ThemeProvider>
-      <NotificationProvider>
-        <NavigationContainer>
-          <RootNavigator />
-          <Toast position="top" />
-        </NavigationContainer>
-        <PortalHost />
-      </NotificationProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <NavigationContainer>
+              <RootNavigator />
+              <Toaster />
+            </NavigationContainer>
+            <PortalHost />
+          </NotificationProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
     // </AuthProvider>
   );
 }

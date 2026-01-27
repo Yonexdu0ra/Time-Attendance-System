@@ -2,7 +2,7 @@ import { request } from '@/utils/request';
 import { create } from 'zustand'
 import DeviceInfo from 'react-native-device-info'
 import { Platform } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 
 
 
@@ -37,16 +37,10 @@ const useNotificationStore = create((set, get) => ({
                 method: 'POST',
                 body: JSON.stringify(data),
             })
-            Toast.show({
-                type: 'success',
-                text1: 'Device registered for notifications',
-            });
+            
         } catch (error) {
             console.error('Failed to register device token:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Failed to register device for notifications',
-            });
+           
             return
         }
     },
@@ -64,10 +58,7 @@ const useNotificationStore = create((set, get) => ({
                 unReadCount: totalUnread,
             }));
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Failed to load notifications',
-            });
+           toast.error('Failed to load notifications');
             set({ isLoading: false });
             console.error('Failed to load notifications:', error);
         }
@@ -86,10 +77,7 @@ const useNotificationStore = create((set, get) => ({
                 isEnd: response.nextCursorId ? false : true,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Failed to refresh notifications',
-            });
+            toast.error('Failed to refresh notifications');
             set({ isRefreshing: false });
             console.error('Failed to refresh notifications:', error);
         }
@@ -107,10 +95,7 @@ const useNotificationStore = create((set, get) => ({
                 unReadCount: Math.max(0, state.unReadCount - 1),
             }));
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Failed to mark notification as read',
-            });
+            toast.error('Failed to mark notification as read');;
             console.error('Failed to mark notification as read:', error);
         }
     },
@@ -124,10 +109,7 @@ const useNotificationStore = create((set, get) => ({
                 unReadCount: 0,
             }));
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Failed to mark all notifications as read',
-            });
+            toast.error('Failed to mark all notifications as read');;
             console.error('Failed to mark all notifications as read:', error);
         }
     },

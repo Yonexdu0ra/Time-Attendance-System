@@ -1,6 +1,7 @@
-import Toast from "react-native-toast-message";
+
 import { create } from "zustand";
 import { request } from "../utils/request";
+import { toast } from "sonner-native";
 
 
 const useShiftStore = create((set, get) => ({
@@ -38,11 +39,7 @@ const useShiftStore = create((set, get) => ({
             });
         } catch (error) {
             set({ isLoading: false });
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            })
+            toast.error(error.message || 'Lấy danh sách ca làm việc thất bại');
         }
     },
     handleGetListShiftJoinedByCursorPagination: async () => {
@@ -57,11 +54,7 @@ const useShiftStore = create((set, get) => ({
             });
         } catch (error) {
             set({ isLoading: false });
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            })
+            toast.error(error.message || 'Lấy danh sách ca làm việc đã tham gia thất bại');
         }
     },
     handleJoinShift: async (shiftId) => {
@@ -82,17 +75,9 @@ const useShiftStore = create((set, get) => ({
                 }
             })
             set({ shifts: newShifts });
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: 'Yêu cầu tham gia ca làm việc đã được gửi',
-            });
+            toast.success('Yêu cầu tham gia ca làm việc đã được gửi');
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Yêu cầu tham gia ca làm việc thất bại');
         }
     },
     handleCancelJoinShift: async (userShiftId, status) => {
@@ -115,17 +100,10 @@ const useShiftStore = create((set, get) => ({
                 }
             })
             set({ shifts: newShifts });
-            Toast.show({
-                type: 'success',
-                text1: 'Thành công',
-                text2: 'Yêu cầu tham gia ca làm việc đã được hủy',
-            });
+            toast.success('Hủy yêu cầu tham gia ca làm việc thành công');
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Hủy yêu cầu tham gia ca làm việc thất bại');
+             
         }
     },
     handleUpdateShiftStatus: async (shiftId, status) => {
@@ -144,11 +122,8 @@ const useShiftStore = create((set, get) => ({
             });
             set({ shifts: newShifts });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Cập nhật trạng thái ca làm việc thất bại');
+           
         }
     },
     handleRefreshShifts: async () => {
@@ -163,11 +138,7 @@ const useShiftStore = create((set, get) => ({
                 isLoading: false,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách ca làm việc thất bại');
             set({ isRefreshing: false, isLoading: false, });
         }
     },
@@ -183,11 +154,8 @@ const useShiftStore = create((set, get) => ({
                 isLoading: false,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách ca làm việc đã tham gia thất bại');
+           
             set({ isRefreshing: false, isLoading: false, });
         }
     },

@@ -1,5 +1,5 @@
 import { request } from "@/utils/request";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { create } from "zustand";
 
 
@@ -26,11 +26,8 @@ const useHolidayStore = create((set, get) => ({
                 cursorId: response.nextCursorId,
             });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lấy danh sách ngày lễ thất bại',
-                text2: error.message || 'Vui lòng thử lại sau',
-            });
+            toast.error(error.message || 'Lấy danh sách ngày lễ thất bại');
+            
             return
         }
         finally {
@@ -44,11 +41,7 @@ const useHolidayStore = create((set, get) => ({
             set({ holidays: response.data || [], cursorId: response.nextCursorId });
         }
         catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lấy danh sáchngày lễ thất bại',
-                text2: error.message || 'Vui lòng thử lại sau',
-            });
+            toast.error(error.message || 'Lấy danh sách ngày lễ thất bại');
             return
         }
         finally {

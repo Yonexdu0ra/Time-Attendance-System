@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { clearRefreshToken } from '../utils/token'
-import Toast from "react-native-toast-message";
 import { request } from "@/utils/request";
 import { storage } from "@/utils/storage";
 import DeviceInfo from "react-native-device-info";
+import { toast } from "sonner-native";
 const useAuthStore = create((set, get) => ({
   /* ===== STATE ===== */
   loading: true,
@@ -33,7 +33,7 @@ const useAuthStore = create((set, get) => ({
         });
       }
     } catch (e) {
-      console.log(e);
+      // console.log(e);
 
       set({
         user: null,
@@ -53,22 +53,14 @@ const useAuthStore = create((set, get) => ({
           'app-device-id': await DeviceInfo.getUniqueId(),
         }
       });
-      Toast.show({
-        type: 'success',
-        text1: 'Thành công',
-        text2: logoutData.message,
-      });
+      toast.success(logoutData.message || 'Đăng xuất thành công');
       await clearRefreshToken();
       set({
         user: null,
         loading: false,
       })
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Thất bại',
-        text2: error.message || 'Vui lòng thử lại sau',
-      });
+      toast.error('Đăng xuất thất bại. Vui lòng thử lại.');
       return;
     }
   }

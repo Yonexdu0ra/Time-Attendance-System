@@ -1,5 +1,5 @@
 import { request } from "@/utils/request";
-import Toast from "react-native-toast-message";
+import { toast } from "sonner-native";
 import { create } from 'zustand'
 
 
@@ -20,11 +20,8 @@ const useShiftAttendanceStore = create((set, get) => ({
             const newData = [...data, ...get().shiftAttendances];     
             set({ shiftAttendances: newData, cursorId: response.nextCursorId });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách điểm danh ca làm việc thất bại');
+             
             return
         }
         finally {
@@ -38,11 +35,8 @@ const useShiftAttendanceStore = create((set, get) => ({
             const data = response.data;
             set({ shiftAttendances: data, cursorId: response.nextCursorId });
         } catch (error) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: error.message,
-            });
+            toast.error(error.message || 'Lấy danh sách điểm danh ca làm việc thất bại');
+            
             return
         } finally {
             set({ isRefreshing: false });
