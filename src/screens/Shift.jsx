@@ -117,7 +117,7 @@ function ShiftScreen({ navigation }) {
             </View>
 
             <Badge>
-              <Text>{SHIFT_TYPE_STRING[item.type]}</Text>
+              <Text>Ca {SHIFT_TYPE_STRING[item.type]}</Text>
             </Badge>
           </View>
 

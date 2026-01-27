@@ -12,7 +12,6 @@ import ThemeProvider from './src/context/ThemeContext';
 // import Toast from 'react-native-toast-message';
 import useAuthStore from './src/store/authStore';
 import { useEffect } from 'react';
-import { PortalHost } from '@rn-primitives/portal';
 import NotificationProvider from '@/context/NotificationContext';
 import { Toaster } from 'sonner-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -32,7 +31,6 @@ function App() {
               <RootNavigator />
               <Toaster />
             </NavigationContainer>
-            <PortalHost />
           </NotificationProvider>
         </ThemeProvider>
       </SafeAreaProvider>

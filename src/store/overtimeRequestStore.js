@@ -40,7 +40,6 @@ const useOvertimeRequestStore = create((set, get) => ({
             });
         } catch (error) {
             toast.error(error.message || 'Lấy danh sách yêu cầu làm thêm giờ thất bại');
-             
         }
     },
     handleRefreshOvertimeRequests: async () => {
@@ -49,8 +48,9 @@ const useOvertimeRequestStore = create((set, get) => ({
         set({ isRefreshing: false });
     },
     handleCreateOvertimeRequest: async () => {
+        const idLoading = toast.loading('Đang tạo yêu cầu làm thêm giờ...');
         try {
-            
+
             const { formData } = get();
             const response = await request('/overtime-requests', {
                 method: 'POST',
@@ -58,14 +58,15 @@ const useOvertimeRequestStore = create((set, get) => ({
                 body: JSON.stringify(formData),
             });
             const newData = response.data;
-            if(!response.success) throw new Error(response.message || 'Tạo yêu cầu làm thêm giờ thất bại');
+            if (!response.success) throw new Error(response.message || 'Tạo yêu cầu làm thêm giờ thất bại');
             set({ overtimeRequest: [newData, ...get().overtimeRequest] });
-            toast.success('Tạo yêu cầu làm thêm giờ thành công');
+            toast.success('Tạo yêu cầu làm thêm giờ thành công', { id: idLoading });
         } catch (error) {
-            toast.error(error.message || 'Tạo yêu cầu làm thêm giờ thất bại');
+            toast.error(error.message || 'Tạo yêu cầu làm thêm giờ thất bại', { id: idLoading });
         }
     },
     handleUpdateOvertimeRequestStatus: async (overtimeRequestId, status) => {
+        const idLoading = toast.loading('Đang cập nhật trạng thái yêu cầu làm thêm giờ...');
         try {
             const response = await request(`/overtime-requests/${overtimeRequestId}/status`, {
                 method: 'POST',
@@ -84,11 +85,17 @@ const useOvertimeRequestStore = create((set, get) => ({
             }
             );
             set({ overtimeRequest: updatedOvertimeRequests });
+            toast.success('Cập nhật trạng thái yêu cầu làm thêm giờ thành công', {
+                id: idLoading,
+            });
         } catch (error) {
-            toast.error('Cập nhật trạng thái yêu cầu làm thêm giờ thất bại');
+            toast.error('Cập nhật trạng thái yêu cầu làm thêm giờ thất bại', {
+                id: idLoading,
+            });
         }
     },
     handleCancelOvertimeRequest: async (id) => {
+        const idLoading = toast.loading('Đang hủy yêu cầu làm thêm giờ...');
         try {
             const response = await request(`/overtime-requests/${id}/cancel`, {
                 method: 'POST',
@@ -104,10 +111,10 @@ const useOvertimeRequestStore = create((set, get) => ({
                 return item;
             }
             );
-            toast.success(response.message);
+            toast.success(response.message, { id: idLoading });
             set({ overtimeRequest: newDate });
         } catch (error) {
-            toast.error(error.message || 'Hủy yêu cầu làm thêm giờ thất bại');
+            toast.error(error.message || 'Hủy yêu cầu làm thêm giờ thất bại', { id: idLoading });
         }
 
     },

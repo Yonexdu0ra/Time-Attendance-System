@@ -11,7 +11,7 @@ export default function useTimeProgress(expired, tick = 1000) {
       const currentTime = Date.now();
       const elapsed = currentTime - now;
       const newProgress = Math.min(elapsed / totalDuration, 1);
-      setProgress(isNaN(newProgress) ? 0 : newProgress);
+      setProgress(isNaN(newProgress) ? 1 : newProgress);
     }
     updateProgress();
     const interval = setInterval(updateProgress, tick);

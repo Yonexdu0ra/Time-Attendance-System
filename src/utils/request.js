@@ -52,7 +52,11 @@ async function refreshAccessToken() {
 // ===== MAIN REQUEST =====
 export async function request(path, options = {}) {
   try {
-    const accessToken = accessTokenStore?.getState?.()?.accessToken || storage.getString('accessToken')
+    const storedToken = storage.getString('accessToken');
+    if(!accessTokenStore.getState()?.accessToken) {
+      accessTokenStore.getState().setAccessToken(storedToken);
+    }
+    const accessToken = accessTokenStore?.getState?.()?.accessToken 
 
     const res = await fetch(`${API_URL}${path}`, {
       ...options,

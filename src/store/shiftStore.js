@@ -58,6 +58,7 @@ const useShiftStore = create((set, get) => ({
         }
     },
     handleJoinShift: async (shiftId) => {
+        const idLoading = toast.loading('Đang gửi yêu cầu tham gia ca làm việc...');
         try {
             const shifJoinData = await request(
                 `/user-shifts/request-join-shift/${shiftId}`,
@@ -75,12 +76,13 @@ const useShiftStore = create((set, get) => ({
                 }
             })
             set({ shifts: newShifts });
-            toast.success('Yêu cầu tham gia ca làm việc đã được gửi');
+            toast.success('Yêu cầu tham gia ca làm việc đã được gửi', { id: idLoading });
         } catch (error) {
-            toast.error(error.message || 'Yêu cầu tham gia ca làm việc thất bại');
+            toast.error(error.message || 'Yêu cầu tham gia ca làm việc thất bại', { id: idLoading });
         }
     },
     handleCancelJoinShift: async (userShiftId, status) => {
+        const idLoading = toast.loading('Đang hủy yêu cầu tham gia ca làm việc...');
         try {
             const shiftStatusData = await request(
                 `/user-shifts/cancel-request/${userShiftId}`,
@@ -100,13 +102,14 @@ const useShiftStore = create((set, get) => ({
                 }
             })
             set({ shifts: newShifts });
-            toast.success('Hủy yêu cầu tham gia ca làm việc thành công');
+            toast.success('Hủy yêu cầu tham gia ca làm việc thành công', { id: idLoading });
         } catch (error) {
-            toast.error(error.message || 'Hủy yêu cầu tham gia ca làm việc thất bại');
+            toast.error(error.message || 'Hủy yêu cầu tham gia ca làm việc thất bại', { id: idLoading });
              
         }
     },
     handleUpdateShiftStatus: async (shiftId, status) => {
+        const idLoading = toast.loading('Đang cập nhật trạng thái ca làm việc...');
         try {
             const shiftStatusData = await request(
                 `/shifts/requests/${shiftId}/status`,
@@ -121,8 +124,9 @@ const useShiftStore = create((set, get) => ({
                 status: shiftStatusData.data.status,
             });
             set({ shifts: newShifts });
+            toast.success('Cập nhật trạng thái ca làm việc thành công', { id: idLoading });
         } catch (error) {
-            toast.error(error.message || 'Cập nhật trạng thái ca làm việc thất bại');
+            toast.error(error.message || 'Cập nhật trạng thái ca làm việc thất bại', { id: idLoading });
            
         }
     },

@@ -63,6 +63,7 @@ const useLeaveRequestStore = create((set, get) => ({
         }
     },
     async handleCreateLeaveRequest() {
+        const idLoading = toast.loading('Đang tạo yêu cầu nghỉ phép...');
         try {
             const { formData } = get();
             const response = await request('/leave-requests', {
@@ -80,7 +81,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 },
                 leaveRequest: [response.data, ...get().leaveRequest],
             })
-            toast.success('Yêu cầu nghỉ phép đã được gửi thành công.');
+            toast.success('Yêu cầu nghỉ phép đã được gửi thành công.', { id: idLoading });
           
         } catch (error) {
             console.log(error);
@@ -93,10 +94,11 @@ const useLeaveRequestStore = create((set, get) => ({
                     reason: '',
                 }
             })
-            toast.error(error.message || 'Tạo yêu cầu nghỉ phép thất bại');
+            toast.error(error.message || 'Tạo yêu cầu nghỉ phép thất bại', { id: idLoading });
         }
     },
     async handleUpdateLeaveRequestStatus(id, status) {
+        const idLoading = toast.loading('Đang cập nhật trạng thái yêu cầu nghỉ phép...');
         try {
             const response = await request(`/leave-requests/${id}/status`, {
                 method: 'POST',
@@ -113,13 +115,14 @@ const useLeaveRequestStore = create((set, get) => ({
                 }
                 return item;
             });
-            toast.success('Cập nhật trạng thái yêu cầu nghỉ phép thành công');
+            toast.success('Cập nhật trạng thái yêu cầu nghỉ phép thành công', { id: idLoading });
             set({ leaveRequest: newDate });
         } catch (error) {
-            toast.error(error.message || 'Cập nhật trạng thái yêu cầu nghỉ phép thất bại');
+            toast.error(error.message || 'Cập nhật trạng thái yêu cầu nghỉ phép thất bại', { id: idLoading });
         }
     },
     async handleCancelLeaveRequest(id) {
+        const idLoading = toast.loading('Đang hủy yêu cầu nghỉ phép...');
         try {
             const response = await request(`/leave-requests/${id}/cancel`, {
                 method: 'POST',
@@ -135,10 +138,10 @@ const useLeaveRequestStore = create((set, get) => ({
                 return item;
             }
             );
-            toast.success('Hủy yêu cầu nghỉ phép thành công');
+            toast.success('Hủy yêu cầu nghỉ phép thành công', { id: idLoading });
             set({ leaveRequest: newDate });
         } catch (error) {
-            toast.error(error.message || 'Hủy yêu cầu nghỉ phép thất bại');
+            toast.error(error.message || 'Hủy yêu cầu nghỉ phép thất bại', { id: idLoading });
         }
 
     },

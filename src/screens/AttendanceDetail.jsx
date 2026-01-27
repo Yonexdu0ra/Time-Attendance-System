@@ -68,7 +68,7 @@ function AttendanceDetailScreen({ navigation, route }) {
 
               <Text className="text-destructive/70 text-sm leading-5">
                 {attendance.fraudReason ||
-                  'Phát hiện vị trí chấm công không hợp lệ. Yêu cầu này sẽ không được chấp nhận nếu không có sự xác nhận từ quản lý.'}
+                  'Phát hiện vị trí chấm công không hợp lệ. Yêu cầu này sẽ không được chấp nhận nếu không có sự xác nhận từ quản lý. Vui lòng liên hệ quản lý để được hỗ trợ.'}
               </Text>
             </View>
           </View>
@@ -113,7 +113,7 @@ function AttendanceDetailScreen({ navigation, route }) {
                     y: 1.5,
                   }}
                 >
-                  <Callout id="callout_id" title={attendance.shift.name}></Callout>
+                  <Callout id="callout_id" title={attendance.shift.address}></Callout>
                 </PointAnnotation>
 
                 <MarkerView
@@ -214,6 +214,16 @@ function AttendanceDetailScreen({ navigation, route }) {
               <Text className="text-sm text-muted-foreground">
                 {/* {attendance.gps || 'Không xác định'} */}
                 {attendance.latitude}, {attendance.longitude}
+              </Text>
+            </Animated.View>
+            <Animated.View
+              entering={FadeInDown.delay(1000)}
+              className="flex-row justify-between items-center p-4 border-b border-muted-foreground/20"
+            >
+              <Text className="">Cách vị trí chấm công</Text>
+              <Text className="text-sm text-muted-foreground">
+                {/* {attendance.gps || 'Không xác định'} */}
+                {distance} m
               </Text>
             </Animated.View>
             <Animated.View
