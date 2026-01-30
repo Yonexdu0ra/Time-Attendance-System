@@ -39,7 +39,7 @@ function RequestTopTab({ navigation }) {
           // swipeEnabled: false
         }}
       />
-      {user.role >= 1 && (
+      {/* {user.role >= 1 && (
         <Tab.Screen
           name="ShiftAttendance"
           component={ShiftAttendanceScreen}
@@ -49,7 +49,7 @@ function RequestTopTab({ navigation }) {
             // swipeEnabled: false
           }}
         />
-      )}
+      )} */}
     </Tab.Navigator>
   );
 }

@@ -4,6 +4,7 @@ import { Text } from '@/components/ui/text';
 import { useTheme } from '@/context/ThemeContext';
 import useAuthStore from '@/store/authStore';
 import useLeaveRequestStore from '@/store/leaveRequestStore';
+import emitter from '@/utils/emitter';
 import { Plus } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { toast } from 'sonner-native';
 
 /* ===================== HELPERS ===================== */
 const formatDate = date =>
@@ -203,6 +205,7 @@ function LeaveRequestScreen({ navigation }) {
     handleCancelLeaveRequest,
     handleUpdateLeaveRequestStatus,
     handleRefreshLeaveRequests,
+    setLeaveRequest
   } = useLeaveRequestStore();
 
   const listFilter = [
@@ -220,6 +223,16 @@ function LeaveRequestScreen({ navigation }) {
 
   useEffect(() => {
     init();
+  }, []);
+  useEffect(() => {
+    const handler = (data) => {
+      setLeaveRequest(prev => prev.map(item => item.id === data.id ? data : item));
+      toast.info('Có yêu cầu nghỉ phép mới được cập nhật');
+    }
+    emitter.on('leave_request', handler);
+    return () => {
+      emitter.off('leave_request', handler);
+    }
   }, []);
 
   return (

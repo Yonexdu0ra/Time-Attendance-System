@@ -13,13 +13,14 @@ export function Bell() {
   const unReadCount = useNotificationStore(state => state.unReadCount);
   const { themeColor } = useTheme();
   const initNotification = useNotificationStore(state => state.init);
-    useEffect(() => {
+  useEffect(() => {
     const t = setTimeout(() => {
       initNotification();
     }, 150); // đợi animation xong
 
     return () => clearTimeout(t);
   }, []);
+ 
   return (
     <TouchableOpacity
       className="mr-4"
@@ -29,12 +30,12 @@ export function Bell() {
         <BellIcon size={24} color={themeColor.foreground} />
         {unReadCount > 0 && (
           <Badge variant={'destructive'} className={'absolute -right-3 -top-3'}>
-            <Text style={{width: unReadCount.toString().length * 8}}>{unReadCount < 10 ? unReadCount : '9+'}</Text>
+            <Text style={{ width: unReadCount.toString().length * 8 }}>
+              {unReadCount < 10 ? unReadCount : '9+'}
+            </Text>
           </Badge>
         )}
       </Animated.View>
     </TouchableOpacity>
   );
 }
-
-

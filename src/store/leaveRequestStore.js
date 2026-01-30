@@ -20,7 +20,13 @@ const useLeaveRequestStore = create((set, get) => ({
     },
     setIsRefreshing: (isRefreshing) => set({ isRefreshing }),
     setCursorId: (cursorId) => set({ cursorId }),
-    setLeaveRequest: (leaveRequest) => set({ leaveRequest }),
+    setLeaveRequest: (updater) =>
+        set(state => ({
+            leaveRequest:
+                typeof updater === 'function'
+                    ? updater(state.leaveRequest)
+                    : updater,
+        })),
     setIsLoading: (isLoading) => set({ isLoading }),
     setFormData: (field) => {
         set({
@@ -43,7 +49,7 @@ const useLeaveRequestStore = create((set, get) => ({
             })
         } catch (error) {
             toast.error(error.message || 'Lấy danh sách yêu cầu nghỉ phép thất bại');
-            
+
         }
         finally {
             set({ isLoading: false, isRefreshing: false });
@@ -70,7 +76,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 method: 'POST',
                 body: JSON.stringify(formData),
             });
-            if(!response.success) throw new Error('Tạo yêu cầu nghỉ phép thất bại');
+            if (!response.success) throw new Error('Tạo yêu cầu nghỉ phép thất bại');
             set({
                 formData: {
                     startDate: new Date(),
@@ -82,7 +88,7 @@ const useLeaveRequestStore = create((set, get) => ({
                 leaveRequest: [response.data, ...get().leaveRequest],
             })
             toast.success('Yêu cầu nghỉ phép đã được gửi thành công.', { id: idLoading });
-          
+
         } catch (error) {
             console.log(error);
 

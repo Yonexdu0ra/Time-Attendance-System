@@ -197,6 +197,13 @@ function HomeScreen({ navigation }) {
                     </Button>
                   </View>
                 )}
+                {!position && hasPermissionLocation && (
+                  <View className="p-4">
+                    <Text className="text-center font-semibold mb-2">
+                      Đang lấy vị trí hiện tại...
+                    </Text>
+                  </View>
+                )}
 
                 {/* SHIFT INFO */}
                 <View className="p-4 gap-2">

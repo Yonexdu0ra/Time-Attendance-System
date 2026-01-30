@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import useAuthStore from '@/store/authStore';
 import useOvertimeRequestStore from '@/store/overtimeRequestStore';
+import emitter from '@/utils/emitter';
 import formatTime from '@/utils/formatTime';
 import { Plus } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
@@ -14,6 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { toast } from 'sonner-native';
 
 /* ===================== ITEM ===================== */
 const OvertimeRequestItem = ({
@@ -204,6 +206,9 @@ function OvertimeRequestScreen({ navigation }) {
   const overtimeRequest = useOvertimeRequestStore(
     state => state.overtimeRequest,
   );
+  const setOvertimeRequest = useOvertimeRequestStore(
+    state => state.setOvertimeRequest,
+  );
   const isEnd = useOvertimeRequestStore(state => state.isEnd);
   const handleGetOvertimeRequestCursorPagination = useOvertimeRequestStore(
     state => state.handleGetOvertimeRequestCursorPagination,
@@ -250,7 +255,20 @@ function OvertimeRequestScreen({ navigation }) {
   useEffect(() => {
     init();
   }, []);
-
+  useEffect(() => {
+    const handler = (data) => {
+      // const newData = overtimeRequest.map(item => item.id === data.id ? data : item);
+      // setOvertimeRequest(newData);
+      setOvertimeRequest(prev =>
+      prev.map(item => item.id === data.id ? data : item)
+    );
+      toast.info('Có yêu cầu tăng ca mới được cập nhật');
+    }
+    emitter.on('overtime_request', handler)
+    return () => {
+      emitter.off('overtime_request', handler)
+    }
+  }, [])
   return (
     <View className="flex-1 bg-background">
       <FlatList

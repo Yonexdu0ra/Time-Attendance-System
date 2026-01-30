@@ -17,7 +17,13 @@ const useOvertimeRequestStore = create((set, get) => ({
         shiftId: null,
     },
     setCursorId: (cursorId) => set({ cursorId }),
-    setOvertimeRequest: (overtimeRequest) => set({ overtimeRequest }),
+    setOvertimeRequest: (updater) =>
+        set(state => ({
+            overtimeRequest:
+                typeof updater === 'function'
+                    ? updater(state.overtimeRequest)
+                    : updater,
+        })),
     setIsLoading: (isLoading) => set({ isLoading }),
     setIsRefreshing: (isRefreshing) => set({ isRefreshing }),
     setFormData: (field) => {

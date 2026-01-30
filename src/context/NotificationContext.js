@@ -5,6 +5,7 @@ import { storage } from '@/utils/storage';
 import useNotificationStore from '@/store/notificationStore';
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import useAuthStore from '@/store/authStore';
+import emitter from '@/utils/emitter';
 const NotificationContext = createContext(null);
 export const useNotification = () => useContext(NotificationContext);
 
@@ -40,9 +41,9 @@ const NotificationProvider = ({ children }) => {
     const registerDeviceIfNeeded = async () => {
         const token = await messaging().getToken();
         const savedToken = storage.getString(FCM_TOKEN_KEY);
-       
-        
-        if (token && token !== savedToken) {
+
+
+        if (token !== savedToken) {
             // 👉 call API register device
             await registerDeviceToken(token);
 
@@ -90,7 +91,7 @@ const NotificationProvider = ({ children }) => {
 
         const unsubscribeMessage = messaging().onMessage(async remoteMessage => {
             // console.log(remoteMessage);
-            
+
             await notifee.displayNotification({
                 title: remoteMessage.notification?.title,
                 body: remoteMessage.notification?.body,
@@ -100,12 +101,15 @@ const NotificationProvider = ({ children }) => {
                 },
                 data: remoteMessage.data,
             });
-            addNotification({
-                id: remoteMessage.data.id,
-                title: remoteMessage.notification?.title || '',
-                message: remoteMessage.notification?.body || '',
-                ...remoteMessage.data,
-            });
+            
+            if (remoteMessage.data.noti) {
+                const noti = JSON.parse(remoteMessage.data.noti);
+                addNotification(noti);
+
+            }
+            console.log(remoteMessage);
+            
+            emitter.emit(remoteMessage.data.event, JSON.parse(remoteMessage.data.data || '{}'));
         });
         const unsubscribeRefreshToken = messaging().onTokenRefresh(async (token) => {
             storage.set(FCM_TOKEN_KEY, token);
